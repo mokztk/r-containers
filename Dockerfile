@@ -13,8 +13,8 @@ FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.1 AS tidyverse_base
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
 # 以降も何度か apt-get を使うので BuildKit のキャッシュマウント機能を使う
-RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+RUN --mount=type=cache,id=apt-lib-${TARGETARCH},target=/var/lib/apt \
+    --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -29,40 +29,45 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
-    && apt-get clean \
     && mkdir -p /etc/R
 
-# pandoc, quarto は rocker/rstudio:4.5.1 と同じバージョンを指定
-# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @07c155e 準拠）
-
-ENV DEFAULT_USER="rstudio" \
-    PANDOC_VERSION="3.8.2.1" \
-    QUARTO_VERSION="1.7.32"
-
+# 一般ユーザー rstudio を作成。パスワード無しで sudo 可能にする
+ENV DEFAULT_USER="rstudio"
 RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}" \
     && echo "${DEFAULT_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${DEFAULT_USER} \
     && chmod 0440 /etc/sudoers.d/${DEFAULT_USER}
 
-RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+# pandoc, quarto は rocker/rstudio:4.5.1 と同じバージョンを指定
+# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @07c155e 準拠）
+
+ENV PANDOC_VERSION="3.8.2.1" \
+    QUARTO_VERSION="1.7.32"
+
+RUN --mount=type=cache,id=apt-lib-${TARGETARCH},target=/var/lib/apt \
+    --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     sed -e "16,26d" -e "85d" /rocker_scripts/install_pandoc.sh | bash \
     && sed -e "21,31d" -e "74d" /rocker_scripts/install_quarto.sh | bash
 
-# install uv
+# install uv & python
 COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /uvx /opt/uv/bin/
+COPY --chmod=755 my_scripts/install_python_uv.sh /my_scripts/
+RUN --mount=type=cache,id=apt-lib-${TARGETARCH},target=/var/lib/apt \
+    --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
+    bash /my_scripts/install_python_uv.sh
 
-# setup script
-# 各スクリプトは改行コード LF(UNIX) でないとエラーになる
-COPY my_scripts /my_scripts
+# install Node
+COPY --chmod=755 my_scripts/install_nodejs.sh /my_scripts/
+RUN bash /my_scripts/install_nodejs.sh
 
-RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,id=r-cache-${TARGETARCH},target=/root/.cache/R \
-    chmod 775 my_scripts/* \
-    && bash /my_scripts/install_r_packages_pak.sh \
-    && bash /my_scripts/install_python_uv.sh \
-    && bash /my_scripts/install_nodejs.sh \
-    && bash /my_scripts/install_notojp.sh \
+# install R packages
+COPY --chmod=755 my_scripts/install_r_packages_pak.sh /my_scripts/
+RUN --mount=type=cache,id=apt-lib-${TARGETARCH},target=/var/lib/apt \
+    --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
+    bash /my_scripts/install_r_packages_pak.sh
+
+# フォントその他
+COPY --chmod=755 my_scripts /my_scripts
+RUN bash /my_scripts/install_notojp.sh \
     && bash /my_scripts/install_msedit.sh
 
 # 検証用ファイル
