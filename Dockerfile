@@ -30,7 +30,7 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
-    && mkdir -p /etc/R
+    && mkdir -p /etc/R \
     && rm -rf /var/lib/apt/lists/*
 
 # 一般ユーザー rstudio を作成。パスワード無しで sudo 可能にする
@@ -91,7 +91,7 @@ ENV S6_VERSION="v2.1.0.2" \
 
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     apt-get update \
-    && sed -e "131d" /rocker_scripts/install_rstudio.sh | bash
+    && sed -e "131d" /rocker_scripts/install_rstudio.sh | bash \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /my_scripts/install_coding_fonts.sh
