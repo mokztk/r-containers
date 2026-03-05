@@ -6,6 +6,7 @@
 
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
 
+ARG TARGETPLATFORM
 ARG TARGETARCH
 FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.1 AS tidyverse_base
 
@@ -56,7 +57,7 @@ COPY my_scripts /my_scripts
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/root/.cache/R,sharing=locked \
+    --mount=type=cache,id=r-cache-${TARGETARCH},target=/root/.cache/R \
     chmod 775 my_scripts/* \
     && bash /my_scripts/install_r_packages_pak.sh \
     && bash /my_scripts/install_python_uv.sh \
