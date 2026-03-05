@@ -6,7 +6,6 @@
 
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
 
-ARG BUILDKIT_INLINE_CACHE=1
 ARG TARGETPLATFORM
 
 FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.1 AS tidyverse_base
@@ -63,10 +62,8 @@ COPY --chmod=755 my_scripts/install_nodejs.sh /my_scripts/
 RUN bash /my_scripts/install_nodejs.sh
 
 # install R packages
-ENV R_PKG_CACHE_DIR=/root/.cache/R/pak
 COPY --chmod=755 my_scripts/install_r_packages_pak.sh /my_scripts/
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
-    --mount=type=cache,id=pak-cache-${TARGETARCH},target=/root/.cache/R \
     bash /my_scripts/install_r_packages_pak.sh \
     && rm -rf /var/lib/apt/lists/*
 
