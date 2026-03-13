@@ -8,19 +8,12 @@ mkdir -p /opt/uv/bin /opt/uv/cache /opt/uv/python
 chown -R root:staff /opt/uv
 chmod -R 777 /opt/uv
 
-# uv のインストール
-# curl -LsSf https://astral.sh/uv/install.sh | sh
-# cp /root/.local/bin/uv /opt/uv/bin
-#
-# 本番の Dockerfile ではインストーラーの代わりに
-# COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /opt/uv/bin/
-
 export UV_CACHE_DIR=/opt/uv/cache
 export UV_PYTHON_INSTALL_DIR=/opt/uv/python
 export PATH="/opt/uv/bin:${PATH}"
 
 # /opt/venv に仮想環境を作る
-uv venv --python 3.12.12 /opt/venv
+uv venv --python 3.12.13 /opt/venv
 chown -R root:staff /opt/venv
 chmod -R g+ws /opt/venv
 source /opt/venv/bin/activate
@@ -37,9 +30,9 @@ strip /usr/local/lib/R/site-library/*/libs/*.so
 
 rm -rf /opt/uv/cache/*
 
-# reticulate が上記でインストールした python 3.12.12 を参照するようにする
+# reticulate が上記でインストールした python 3.12.13 を参照するようにする
 cat << EOF >> /home/rstudio/.Renviron
-#RETICULATE_PYTHON=/opt/uv/python/cpython-3.12.12-linux-x86_64-gnu/bin/python3.12
+#RETICULATE_PYTHON=/opt/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12
 RETICULATE_PYTHON_ENV="/opt/venv"
 EOF
 chown rstudio:rstudio /home/rstudio/.Renviron

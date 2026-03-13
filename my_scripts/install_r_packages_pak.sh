@@ -87,7 +87,9 @@ pak_pak \
     tinytable \
     RcppEigen \
     cpp11 \
-    plogr
+    RcppArmadillo \
+    formatR \
+    hexbin
 
 # R.cache (imported by styler) で使用するキャッシュディレクトリを準備
 mkdir -p /home/rstudio/.cache/R/R.cache

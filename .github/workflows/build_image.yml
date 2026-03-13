@@ -6,9 +6,10 @@ on:
       image_tag:
         description: "Release tag (e.g. 4.5.1_2026Feb)"
         required: true
+
   push:
     branches:
-      - 'devel/*'
+      - 'devel/**'
       - 'feature/**'
       - 'fix/**'
     tags:
@@ -24,13 +25,12 @@ env:
 
 jobs:
 
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [amd64, arm64]
+# =========================
+# amd64 build
+# =========================
 
-    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+  build-amd64:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set tag
+      - name: Determine tag
         id: vars
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -56,54 +56,112 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
-      # -----------------------------
-      # rstudio image
-      # -----------------------------
-      - name: Build rstudio
+      - name: Build rstudio (amd64)
         uses: docker/build-push-action@v5
         with:
           context: .
           target: rstudio
-          platforms: linux/${{ matrix.arch }}
+          platforms: linux/amd64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-${{ matrix.arch }}
-          cache-from: type=gha,scope=rstudio-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=rstudio-${{ matrix.arch }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-amd64
+          cache-from: type=gha,scope=rstudio-amd64
+          cache-to: type=gha,mode=max,scope=rstudio-amd64
           provenance: false
           sbom: false
 
-      # -----------------------------
-      # ssh image
-      # -----------------------------
-      - name: Build ssh
+      - name: Build ssh (amd64)
         uses: docker/build-push-action@v5
         with:
           context: .
           target: ssh
-          platforms: linux/${{ matrix.arch }}
+          platforms: linux/amd64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-${{ matrix.arch }}
-          cache-from: type=gha,scope=ssh-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=ssh-${{ matrix.arch }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64
+          cache-from: type=gha,scope=ssh-amd64
+          cache-to: type=gha,mode=max,scope=ssh-amd64
           provenance: false
           sbom: false
 
 
+# =========================
+# arm64 build
+# =========================
+
+  build-arm64:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tag
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="dev"
+          fi
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Build rstudio (arm64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: rstudio
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-arm64
+          cache-from: type=gha,scope=rstudio-arm64
+          cache-to: type=gha,mode=max,scope=rstudio-arm64
+          provenance: false
+          sbom: false
+
+      - name: Build ssh (arm64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: ssh
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
+          cache-from: type=gha,scope=ssh-arm64
+          cache-to: type=gha,mode=max,scope=ssh-arm64
+          provenance: false
+          sbom: false
+
+
+# =========================
+# merge manifests
+# =========================
+
   merge:
-    needs: build
+    needs: [build-amd64, build-arm64]
     runs-on: ubuntu-latest
 
     steps:
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set tag
+      - name: Determine tag
         id: vars
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -118,13 +176,13 @@ jobs:
       - name: Create rstudio manifest
         run: |
           docker buildx imagetools create \
-            -t ghcr.io/${{ github.repository_owner }}/rstudio:${{ steps.vars.outputs.TAG }} \
-            ghcr.io/${{ github.repository_owner }}/rstudio:${{ steps.vars.outputs.TAG }}-amd64 \
-            ghcr.io/${{ github.repository_owner }}/rstudio:${{ steps.vars.outputs.TAG }}-arm64
+            -t ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }} \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-amd64 \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-arm64
 
       - name: Create ssh manifest
         run: |
           docker buildx imagetools create \
-            -t ghcr.io/${{ github.repository_owner }}/r_remote:${{ steps.vars.outputs.TAG }} \
-            ghcr.io/${{ github.repository_owner }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64 \
-            ghcr.io/${{ github.repository_owner }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
+            -t ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }} \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64 \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
