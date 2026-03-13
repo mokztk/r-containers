@@ -114,7 +114,6 @@ uv tool install radian
 ### rootless モードの設定 (RStudio server 版)
 
 Podman の rootless モードで使用する場合は、そのままの rootless モードでは s6-init から RStudio Server が起動できない。
-
 Linux ホストの UID が 1000 ならば、コンテナ内のユーザー rstudio も UID 1000 なので
 
 ```
@@ -124,6 +123,8 @@ podman run --rm -d --userns=keep-id --user root -e RUNROOTLESS=false -p 8787:878
 で起動できる。それ以上は、[公式](https://rocker-project.org/use/rootless-podman.html) 参照のこと。
 
 また、`ROOTLESS=false` を設定しておけば、従来どおりユーザー rstudio を使用するので amd64 (x86_64) 版と設定ファイルなどを共用できる。
+
+以上より、`ROOTLESS=false` を埋め込んでおく。rocker project 純正の rootless 用処理が必要なら、`-e ROOTLESS=true` で起動する。
 
 ### 公開鍵暗号による remote SSH 接続（SSH server 版）
 
