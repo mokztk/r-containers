@@ -1,14 +1,14 @@
-# rocker/r-ver:4.5.1 をベースに共通部分を作ってから RStudio server, SSH server に分岐
-#  ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-10-30"
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.1.Dockerfile
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/rstudio_4.5.1.Dockerfile
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/tidyverse_4.5.1.Dockerfile
+# rocker/r-ver:4.5.2 をベースに共通部分を作ってから RStudio server, SSH server に分岐
+#  ENV CRAN="https://p3m.dev/cran/__linux__/noble/2026-03-10"
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.2.Dockerfile
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/rstudio_4.5.2.Dockerfile
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/tidyverse_4.5.2.Dockerfile
 
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
 
 ARG TARGETPLATFORM
 
-FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.1 AS tidyverse_base
+FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.2 AS tidyverse_base
 
 ARG TARGETARCH
 
@@ -39,23 +39,21 @@ RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}" \
     && echo "${DEFAULT_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${DEFAULT_USER} \
     && chmod 0440 /etc/sudoers.d/${DEFAULT_USER}
 
-# pandoc, quarto は rocker/rstudio:4.5.1 と同じバージョンを指定
-# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @07c155e 準拠）
+# pandoc, quarto は rocker/rstudio:4.5.2 と同じバージョンを指定
+# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @6f25f32 準拠）
 
-ENV PANDOC_VERSION="3.8.2.1" \
-    QUARTO_VERSION="1.7.32"
+ENV PANDOC_VERSION="3.9" \
+    QUARTO_VERSION="1.8.25"
 
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     sed -e "16,26d" -e "85d" /rocker_scripts/install_pandoc.sh | bash \
-    && sed -e "21,31d" -e "74d" /rocker_scripts/install_quarto.sh | bash \
-    && rm -rf /var/lib/apt/lists/*
+    && sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
 
 # install uv & python
-COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /uvx /opt/uv/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.10.9 /uv /uvx /opt/uv/bin/
 COPY --chmod=755 my_scripts/install_python_uv.sh /my_scripts/
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
-    bash /my_scripts/install_python_uv.sh \
-    && rm -rf /var/lib/apt/lists/*
+    bash /my_scripts/install_python_uv.sh
 
 # install Node
 COPY --chmod=755 my_scripts/install_nodejs.sh /my_scripts/
@@ -64,8 +62,7 @@ RUN bash /my_scripts/install_nodejs.sh
 # install R packages
 COPY --chmod=755 my_scripts/install_r_packages_pak.sh /my_scripts/
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
-    bash /my_scripts/install_r_packages_pak.sh \
-    && rm -rf /var/lib/apt/lists/*
+    bash /my_scripts/install_r_packages_pak.sh
 
 # フォントその他
 COPY --chmod=755 my_scripts /my_scripts
@@ -82,17 +79,16 @@ CMD ["R"]
 
 FROM tidyverse_base AS rstudio
 
-# rocker/rstudio:4.5.1 の Dockerfile より流用
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.1.Dockerfile
+# rocker/rstudio:4.5.2 の Dockerfile より流用
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.2.Dockerfile
 
 ENV S6_VERSION="v2.1.0.2" \
-    RSTUDIO_VERSION="2025.09.2+418" \
+    RSTUDIO_VERSION="2026.01.1+403" \
     DEFAULT_USER="rstudio"
 
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     apt-get update \
-    && sed -e "131d" /rocker_scripts/install_rstudio.sh | bash \
-    && rm -rf /var/lib/apt/lists/*
+    && bash /rocker_scripts/install_rstudio.sh
 
 RUN /my_scripts/install_coding_fonts.sh
 

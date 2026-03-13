@@ -100,4 +100,4 @@ rm -rf /tmp/Rtmp*
 strip /usr/local/lib/R/site-library/*/libs/*.so
 
 apt-get clean
-#rm -rf /var/lib/apt/lists/*
+rm -rf /var/lib/apt/lists/*
