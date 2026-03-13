@@ -98,6 +98,8 @@ USER rstudio
 RUN Rscript -e 'dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)' \
     && echo '.libPaths(c(Sys.getenv("R_LIBS_USER"), .Library.site, .Library))' >> /home/rstudio/.Rprofile
 
+WORKDIR /workspace
+
 USER root
 ENV LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
@@ -106,7 +108,6 @@ ENV LANG=ja_JP.UTF-8 \
     DISABLE_AUTH=true \
     RUNROOTLESS=false
 
-WORKDIR /workspace
 EXPOSE 8787
 CMD ["/init"]
 
@@ -123,12 +124,13 @@ USER rstudio
 RUN Rscript -e 'dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)' \
     && echo '.libPaths(c(Sys.getenv("R_LIBS_USER"), .Library.site, .Library))' >> /home/rstudio/.Rprofile
 
+WORKDIR /workspace
+
 USER root
 ENV LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
     TZ=Asia/Tokyo
 
 # SSH server を起動
-WORKDIR /workspace
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
