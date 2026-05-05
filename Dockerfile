@@ -32,18 +32,19 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
         ca-certificates \
         git \
         language-pack-ja-base \
-        git \
+        ssh \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /etc/R \
+    && mkdir -p /etc/R
 
 # 一般ユーザーを作成。パスワード無しで sudo 可能にする
 ENV DEFAULT_USER="ruser"
 RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}" \
-    && echo "${DEFAULT_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${DEFAULT_USER} \
-    && chmod 0440 /etc/sudoers.d/${DEFAULT_USER}
+    && mkdir -p /etc/sudoers.d \
+    && echo "${DEFAULT_USER} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/${DEFAULT_USER}" \
+    && chmod 0440 "/etc/sudoers.d/${DEFAULT_USER}"
 
 # pandoc & quarto
 # wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @2b91d04 準拠）
@@ -74,9 +75,9 @@ RUN mkdir -p /opt/msedit/ \
     && wget -O /opt/msedit/msedit.tar.gz \
         https://github.com/microsoft/edit/releases/download/v2.0.0/edit-2.0.0-`uname -m`-linux-gnu.tar.gz \
     && cd /opt/msedit \
-    && tar -Izstd -xzf msedit.tar.gz \
+    && tar -xzf msedit.tar.gz \
     && mkdir -p /home/${DEFAULT_USER}/.local/bin \
-    && chown -R ${DEFAULT_USER}:${DEFAULT_USER} /home/coder/.local/ \ 
+    && chown -R ${DEFAULT_USER}:${DEFAULT_USER} /home/${DEFAULT_USER}/.local/ \ 
     && ln -s /opt/msedit/edit /home/${DEFAULT_USER}/.local/bin/msedit \
     && rm msedit.tar.gz
 
@@ -96,7 +97,7 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     && bash /my_scripts/install_notojp.sh
 
 # 検証用ファイル
-COPY --chown=rstudio:rstudio utils /home/rstudio/utils
+COPY --chown=${DEFAULT_USER}:${DEFAULT_USER} utils /home/${DEFAULT_USER}/utils
 
 ENV LANG=ja_JP.UTF-8
 ENV LC_ALL=ja_JP.UTF-8
@@ -153,7 +154,7 @@ ENV CODESERVER_VERSION="4.117.0"
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version ${CODESERVER_VERSION}
 
 # ユーザー設定
-USER coder
+USER ${DEFAULT_USER}
 RUN bash /my_scripts/user_settings.sh
 
 WORKDIR /workspace

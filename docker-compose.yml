@@ -31,11 +31,11 @@ services:
       - "22222:22"
 
   codeserver:
-     build:
-       context: .
-       dockerfile: Dockerfile
-       target: codeserver
-     image: "mokztk:codeserver_r:4.5.3"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: codeserver
+    image: "mokztk/codeserver_r:4.5.3"
     depends_on:
       - base
     ports:
