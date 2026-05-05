@@ -81,14 +81,11 @@ RUN mkdir -p /opt/msedit/ \
     && ln -s /opt/msedit/edit /home/${DEFAULT_USER}/.local/bin/msedit \
     && rm msedit.tar.gz
 
-# mokztk/RStudio_docker から流用した setup script
-# 各スクリプトは改行コード LF(UNIX) でないとエラーになる
-COPY --chmod=755 my_scripts /my_scripts
-
 # R の site library を一般ユーザー coder でも書き込みできる場所に移す
 ENV R_LIBS_SITE=/opt/R/packages/4.5
 ENV R_LIBS=${R_LIBS_SITE}:/usr/local/lib/R/library
 
+COPY --chmod=755 my_scripts/install_r_packages_pak.sh my_scripts/install_notojp.sh /my_scripts/
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     mkdir -p ${R_LIBS_SITE} \
     && cp -r /usr/local/lib/R/site-library/* ${R_LIBS_SITE}/ \
@@ -98,6 +95,10 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 
 # 検証用ファイル
 COPY --chown=${DEFAULT_USER}:${DEFAULT_USER} utils /home/${DEFAULT_USER}/utils
+
+# その他の setup script
+# 各スクリプトは改行コード LF(UNIX) でないとエラーになる
+COPY --chmod=755 my_scripts /my_scripts
 
 ENV LANG=ja_JP.UTF-8
 ENV LC_ALL=ja_JP.UTF-8
