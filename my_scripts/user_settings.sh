@@ -13,14 +13,14 @@ code-server --install-extension Google.geminicodeassist
 code-server --install-extension quarto.quarto
 
 # 設定ファイルを docker run -v でマウントするための空ファイル
-# 所有者を coder にして準備しておかないと root になってしまい変更が書き込めない
-mkdir -p /home/coder/.config/code-server
-touch /home/coder/.local/share/code-server/User/settings.json
+# 所有者を ${DEFAULT_USER} にして準備しておかないと root になってしまい変更が書き込めない
+mkdir -p ~/.config/code-server
+touch ~/.local/share/code-server/User/settings.json
 
 # Rのグラフィックデバイスとして httpgd::hgd() を使う設定
 # settings.json で "r.plot.useHttpgd": true が必要
 
-cat << EOF >> /home/coder/.Rprofile
+cat << EOF >> /home/${DEFAULT_USER}/.Rprofile
 
 # use httpgd::hgd() for preview R plots
 options(
@@ -103,5 +103,5 @@ pnpm config set --location=global minimumReleaseAge 10080
 
 # 安全のため、リリース後1週間以上経ったパッケージのみインストールできるようにする
 
-mkdir -p /home/coder/.config/uv
-echo 'exclude-newer = "1 week"' >> /home/coder/.config/uv/uv.toml
+mkdir -p ~/.config/uv
+echo 'exclude-newer = "1 week"' >> ~/.config/uv/uv.toml

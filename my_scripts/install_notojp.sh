@@ -28,6 +28,6 @@ fc-cache -fv
 # Noto Sans/Serif CJK JP を Noto Sans/Serif JP の別名として登録しておく（過去のコードの文字化け回避）
 # 設定しておけば、最低限グラフの文字化けはなくなる
 
-mkdir -p /home/coder/.config/fontconfig
-cp /my_scripts/fonts.conf /home/coder/.config/fontconfig/
-chown -R coder:coder /home/coder/.config
+mkdir -p /home/${DEFAULT_USER}/.config/fontconfig
+cp /my_scripts/fonts.conf /home/${DEFAULT_USER}/.config/fontconfig/
+chown -R ${DEFAULT_USER}:${DEFAULT_USER} /home/${DEFAULT_USER}/.config
