@@ -12,13 +12,10 @@ set -x
 
 mkdir /usr/share/fonts/notojp
 cd /usr/share/fonts/notojp
-#wget -q -O NotoSerifJP-Light.otf https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/JP/NotoSerifJP-Light.otf
 wget -q -O NotoSerifJP-Regular.otf https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/JP/NotoSerifJP-Regular.otf
 wget -q -O NotoSerifJP-Bold.otf https://github.com/notofonts/noto-cjk/raw/main/Serif/SubsetOTF/JP/NotoSerifJP-Bold.otf
 wget -q -O NotoSansJP-Regular.otf https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/JP/NotoSansJP-Regular.otf
 wget -q -O NotoSansJP-Bold.otf https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/JP/NotoSansJP-Bold.otf
-#wget -q -O NotoSansJP-Black.otf https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/JP/NotoSansJP-Black.otf
-#wget -q -O NotoSansJP-Medium.otf https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/JP/NotoSansJP-Medium.otf
 wget -q -O NotoSansMonoCJKjp-Regular.otf https://github.com/notofonts/noto-cjk/raw/main/Sans/Mono/NotoSansMonoCJKjp-Regular.otf
 
 chmod 644 /usr/share/fonts/notojp/*
