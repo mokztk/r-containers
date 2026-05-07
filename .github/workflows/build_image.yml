@@ -67,6 +67,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }}-amd64
           cache-from: type=gha,scope=rbase-amd64
           cache-to: type=gha,mode=max,scope=rbase-amd64
+          provenance: false
+          sbom: false
 
       # 2. Build rstudio
       - name: Build rstudio (amd64)
@@ -79,6 +81,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-amd64
           cache-from: type=gha,scope=rstudio-amd64
           cache-to: type=gha,mode=max,scope=rstudio-amd64
+          provenance: false
+          sbom: false
 
       # 3. Build ssh
       - name: Build ssh (amd64)
@@ -91,6 +95,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64
           cache-from: type=gha,scope=ssh-amd64
           cache-to: type=gha,mode=max,scope=ssh-amd64
+          provenance: false
+          sbom: false
 
       # 4. Build codeserver
       - name: Build codeserver (amd64)
@@ -103,6 +109,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-amd64
           cache-from: type=gha,scope=codeserver-amd64
           cache-to: type=gha,mode=max,scope=codeserver-amd64
+          provenance: false
+          sbom: false
 
 
 # =========================
@@ -147,6 +155,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }}-arm64
           cache-from: type=gha,scope=rbase-arm64
           cache-to: type=gha,mode=max,scope=rbase-arm64
+          provenance: false
+          sbom: false
 
       # 2. Build rstudio
       - name: Build rstudio (arm64)
@@ -159,6 +169,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-arm64
           cache-from: type=gha,scope=rstudio-arm64
           cache-to: type=gha,mode=max,scope=rstudio-arm64
+          provenance: false
+          sbom: false
 
       # 3. Build ssh
       - name: Build ssh (arm64)
@@ -171,6 +183,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
           cache-from: type=gha,scope=ssh-arm64
           cache-to: type=gha,mode=max,scope=ssh-arm64
+          provenance: false
+          sbom: false
 
       # 4. Build codeserver
       - name: Build codeserver (arm64)
@@ -183,6 +197,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-arm64
           cache-from: type=gha,scope=codeserver-arm64
           cache-to: type=gha,mode=max,scope=codeserver-arm64
+          provenance: false
+          sbom: false
 
 
 # =========================
