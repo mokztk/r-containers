@@ -91,7 +91,14 @@ system("node --version", intern = TRUE) |>
 ## Others
 
 ```{r}
-system("msedit --version", intern = TRUE) |> 
+# 環境により、~/.local/bin にPATHが通っていないことがある
+tryCatch(
+    system("msedit --version", intern = TRUE),
+    error = function(e) {
+      paste0(Sys.getenv("HOME"), "/.local/bin にPATHが通っていません\n") |> cat()
+      system("~/.local/bin/msedit --version", intern = TRUE)
+    }
+  ) |>
   paste(collapse = "\n") |> 
   cat()
 ```

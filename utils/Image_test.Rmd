@@ -265,12 +265,12 @@ if ("reticulate" %in% .packages(all.available = TRUE)) {
 }
 ```
 
-### pip list --freeze
+### pip list
 
 ```{r chk_pip_pkgs, results = "asis"}
 tryCatch(
   {
-    system("python -m pip list -freeze", intern = TRUE) %>%
+    system("uv pip list", intern = TRUE) %>%
       paste(collapse = "\n") %>%
       cat()
   },
