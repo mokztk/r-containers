@@ -106,6 +106,25 @@ ENV LANG=ja_JP.UTF-8
 ENV LC_ALL=ja_JP.UTF-8
 ENV TZ=Asia/Tokyo
 
+# 環境変数のエクスポート
+# 1. R用設定 (Renviron.site)
+RUN echo "R_LIBS_SITE=${R_LIBS_SITE}" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo "R_LIBS=${R_LIBS}" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo "PATH=\"${PATH}\"" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo "RETICULATE_PYTHON_ENV=\"${RETICULATE_PYTHON_ENV}\"" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo "LANG=${LANG}" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo "LC_ALL=${LC_ALL}" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo "TZ=${TZ}" >> /usr/local/lib/R/etc/Renviron.site
+
+# 2. シェル・SSH用設定 (/etc/profile.d/)
+RUN echo "export PATH=\"${PATH}\"" > /etc/profile.d/r_containers_env.sh && \
+    echo "export UV_PYTHON_INSTALL_DIR=\"${UV_PYTHON_INSTALL_DIR}\"" >> /etc/profile.d/r_containers_env.sh && \
+    echo "export LANG=\"${LANG}\"" >> /etc/profile.d/r_containers_env.sh && \
+    echo "export LC_ALL=\"${LC_ALL}\"" >> /etc/profile.d/r_containers_env.sh && \
+    echo "export TZ=\"${TZ}\"" >> /etc/profile.d/r_containers_env.sh && \
+    echo "export R_LIBS_SITE=\"${R_LIBS_SITE}\"" >> /etc/profile.d/r_containers_env.sh && \
+    echo "export R_LIBS=\"${R_LIBS}\"" >> /etc/profile.d/r_containers_env.sh
+
 CMD ["R"]
 
 
