@@ -121,8 +121,11 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 
 RUN /my_scripts/install_coding_fonts.sh
 
+RUN mkdir /workspace \
+    && chmod 777 /workspace \
+    && echo "session-default-working-dir=/workspace" >> /etc/rstudio/rsession.conf
+
 WORKDIR /workspace
-RUN echo "session-default-working-dir=/workspace" >> /etc/rstudio/rsession.conf
 
 ENV PASSWORD=password
 ENV DISABLE_AUTH=true
