@@ -15,6 +15,8 @@ ENV PANDOC_VERSION="3.9.0.2"
 ENV QUARTO_VERSION="1.9.36"
 
 ARG PYTHON_VERSION="3.12.13"
+ARG NUMPY_VERSION="1.26"
+ARG PANDAS_VERSION="3.0.1"
 ARG RADIAN_VERSION="0.6.15"
 ARG NODE_VERSION="24.15.0"
 ARG N_VERSION="10.2.0"
@@ -52,16 +54,16 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     sed -e "16,26d" -e "85d" /rocker_scripts/install_pandoc.sh | bash \
     && sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
 
-# uv (Python manager) & radian
+# uv (Python manager) & Python environment
 COPY --from=ghcr.io/astral-sh/uv:0.11.9 /uv /uvx /opt/uv/bin/
 
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
-ENV UV_CACHE_DIR=/opt/uv/cache
 ENV PATH=/opt/venv/bin:/opt/uv/bin:$PATH
 ENV RETICULATE_PYTHON_ENV="/opt/venv"
 
 RUN /opt/uv/bin/uv venv --python ${PYTHON_VERSION} /opt/venv \
-    && uv pip install radian==${RADIAN_VERSION} \
+    && uv pip install numpy==${NUMPY_VERSION} pandas==${PANDAS_VERSION} radian==${RADIAN_VERSION} \
+    && uv cache clean \
     && chown -R ${DEFAULT_USER}:${DEFAULT_USER} /opt/venv
 
 # Node.js / npm / pnpm
