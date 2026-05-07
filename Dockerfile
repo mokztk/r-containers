@@ -7,6 +7,8 @@ ARG TARGETPLATFORM
 
 FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.3 AS base_stacks
 
+LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
+
 ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -132,6 +134,8 @@ CMD ["R"]
 
 FROM base_stacks AS rstudio
 
+LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
+
 # rocker/rstudio:4.5.3 に合わせる
 ENV S6_VERSION="v2.1.0.2"
 ENV RSTUDIO_VERSION="2026.04.0+526"
@@ -160,6 +164,8 @@ CMD ["/init"]
 
 FROM base_stacks AS ssh
 
+LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
+
 RUN /my_scripts/setup_sshd.sh
 
 WORKDIR /workspace
@@ -172,6 +178,8 @@ CMD ["/usr/sbin/sshd", "-D"]
 # 共通部分をベースに、code-server を追加する
 
 FROM base_stacks AS codeserver
+
+LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
 ENV CODESERVER_VERSION="4.117.0"
 
