@@ -110,7 +110,7 @@ ENV TZ=Asia/Tokyo
 # 1. R用設定 (Renviron.site)
 RUN echo "R_LIBS_SITE=${R_LIBS_SITE}" >> /usr/local/lib/R/etc/Renviron.site && \
     echo "R_LIBS=${R_LIBS}" >> /usr/local/lib/R/etc/Renviron.site && \
-    echo "PATH=\"${PATH}\"" >> /usr/local/lib/R/etc/Renviron.site && \
+    echo 'PATH=/opt/venv/bin:/opt/uv/bin:${PATH}' >> /usr/local/lib/R/etc/Renviron.site && \
     echo "RETICULATE_PYTHON_ENV=\"${RETICULATE_PYTHON_ENV}\"" >> /usr/local/lib/R/etc/Renviron.site && \
     echo "LANG=${LANG}" >> /usr/local/lib/R/etc/Renviron.site && \
     echo "LC_ALL=${LC_ALL}" >> /usr/local/lib/R/etc/Renviron.site && \
