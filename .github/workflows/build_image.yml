@@ -262,17 +262,23 @@ jobs:
 # =========================
 
   cleanup:
-    needs: merge # マニフェスト作成後に実行
+    needs: merge
     runs-on: ubuntu-latest
     permissions:
       packages: write
+    strategy:
+      # マトリックスを使用して、各パッケージに対して順番に（または並列に）処理を実行します
+      matrix:
+        package: [r_base, rstudio, r_remote, codeserver_r]
+      fail-fast: false # 一つのパッケージでエラーが出ても他を中断しない
     steps:
-      - name: Delete untagged images for all packages
+      - name: Delete untagged images
         uses: actions/delete-package-versions@v5
         with:
-          # カンマ区切りですべてのパッケージを指定
-          package-name: 'r_base, rstudio, r_remote, codeserver_r'
+          package-name: ${{ matrix.package }}
           package-type: 'container'
+          # 重要: 個人アカウント（mokztk）の場合は 'user' を明示する必要があります
+          # デフォルトが 'organization' になっているため、エラーの原因になります
+          owner-type: 'user'
           min-versions-to-keep: 0
-          # タグがないものだけを削除対象にする
           delete-only-untagged-versions: 'true'
