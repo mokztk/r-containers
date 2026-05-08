@@ -256,3 +256,23 @@ jobs:
             -t ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }} \
             ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-amd64 \
             ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-arm64
+
+# =========================
+#  clean up old images
+# =========================
+
+  cleanup:
+    needs: merge # マニフェスト作成後に実行
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete untagged images for all packages
+        uses: actions/delete-package-versions@v5
+        with:
+          # カンマ区切りですべてのパッケージを指定
+          package-name: 'r_base, rstudio, r_remote, codeserver_r'
+          package-type: 'container'
+          min-versions-to-keep: 0
+          # タグがないものだけを削除対象にする
+          delete-only-untagged-versions: 'true'
