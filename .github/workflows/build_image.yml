@@ -56,6 +56,21 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
+      # 1. Build r_base (base_stacks)
+      - name: Build r_base (amd64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: base_stacks
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }}-amd64
+          cache-from: type=gha,scope=rbase-amd64
+          cache-to: type=gha,mode=max,scope=rbase-amd64
+          provenance: false
+          sbom: false
+
+      # 2. Build rstudio
       - name: Build rstudio (amd64)
         uses: docker/build-push-action@v5
         with:
@@ -63,13 +78,13 @@ jobs:
           target: rstudio
           platforms: linux/amd64
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-amd64
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-amd64
           cache-from: type=gha,scope=rstudio-amd64
           cache-to: type=gha,mode=max,scope=rstudio-amd64
           provenance: false
           sbom: false
 
+      # 3. Build ssh
       - name: Build ssh (amd64)
         uses: docker/build-push-action@v5
         with:
@@ -77,10 +92,23 @@ jobs:
           target: ssh
           platforms: linux/amd64
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64
           cache-from: type=gha,scope=ssh-amd64
           cache-to: type=gha,mode=max,scope=ssh-amd64
+          provenance: false
+          sbom: false
+
+      # 4. Build codeserver
+      - name: Build codeserver (amd64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: codeserver
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-amd64
+          cache-from: type=gha,scope=codeserver-amd64
+          cache-to: type=gha,mode=max,scope=codeserver-amd64
           provenance: false
           sbom: false
 
@@ -116,6 +144,21 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
+      # 1. Build r_base (base_stacks)
+      - name: Build r_base (arm64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: base_stacks
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }}-arm64
+          cache-from: type=gha,scope=rbase-arm64
+          cache-to: type=gha,mode=max,scope=rbase-arm64
+          provenance: false
+          sbom: false
+
+      # 2. Build rstudio
       - name: Build rstudio (arm64)
         uses: docker/build-push-action@v5
         with:
@@ -123,13 +166,13 @@ jobs:
           target: rstudio
           platforms: linux/arm64
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-arm64
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/rstudio:${{ steps.vars.outputs.TAG }}-arm64
           cache-from: type=gha,scope=rstudio-arm64
           cache-to: type=gha,mode=max,scope=rstudio-arm64
           provenance: false
           sbom: false
 
+      # 3. Build ssh
       - name: Build ssh (arm64)
         uses: docker/build-push-action@v5
         with:
@@ -137,10 +180,23 @@ jobs:
           target: ssh
           platforms: linux/arm64
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
           cache-from: type=gha,scope=ssh-arm64
           cache-to: type=gha,mode=max,scope=ssh-arm64
+          provenance: false
+          sbom: false
+
+      # 4. Build codeserver
+      - name: Build codeserver (arm64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: codeserver
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-arm64
+          cache-from: type=gha,scope=codeserver-arm64
+          cache-to: type=gha,mode=max,scope=codeserver-arm64
           provenance: false
           sbom: false
 
@@ -173,6 +229,13 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
+      - name: Create r_base manifest
+        run: |
+          docker buildx imagetools create \
+            -t ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }} \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }}-amd64 \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/r_base:${{ steps.vars.outputs.TAG }}-arm64
+
       - name: Create rstudio manifest
         run: |
           docker buildx imagetools create \
@@ -186,3 +249,36 @@ jobs:
             -t ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }} \
             ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-amd64 \
             ${{ env.REGISTRY }}/${{ env.OWNER }}/r_remote:${{ steps.vars.outputs.TAG }}-arm64
+
+      - name: Create codeserver manifest
+        run: |
+          docker buildx imagetools create \
+            -t ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }} \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-amd64 \
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/codeserver_r:${{ steps.vars.outputs.TAG }}-arm64
+
+# =========================
+#  clean up old images
+# =========================
+
+  cleanup:
+    needs: merge
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      # マトリックスを使用して、各パッケージに対して順番に（または並列に）処理を実行します
+      matrix:
+        package: [r_base, rstudio, r_remote, codeserver_r]
+      fail-fast: false # 一つのパッケージでエラーが出ても他を中断しない
+    steps:
+      - name: Delete untagged images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ matrix.package }}
+          package-type: 'container'
+          # 重要: 個人アカウント（mokztk）の場合は 'user' を明示する必要があります
+          # デフォルトが 'organization' になっているため、エラーの原因になります
+          owner-type: 'user'
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: 'true'

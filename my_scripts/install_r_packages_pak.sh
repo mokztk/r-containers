@@ -2,13 +2,6 @@
 
 # R パッケージのインストール
 
-apt-get update
-
-# base の tcltk パッケージのために Tcl/Tk を入れておく
-apt-get install -y --no-install-recommends \
-    libtcl8.6 \
-    libtk8.6
-
 # まず最新の状態まで更新する
 Rscript -e "update.packages(ask = FALSE)"
 
@@ -30,9 +23,15 @@ function pak_pak() {
     Rscript -e "pak::pak(c(${pkgs}))"
 }
 
+# code-server で使うもの
+
+pak_pak \
+    languageserver \
+    httpgd
+
 # rocker/tidyverse 相当のパッケージ
-# 容量の大きな database backend は RSQLite 以外省略（行番号は @5d33fd1 準拠）
-# sed -e 48d -e 52,56d /rocker_scripts/install_tidyverse.sh | bash
+# 容量の大きな database backend は RSQLite 以外省略（行番号は @2b91d04 準拠）
+# sed -e 49d -e 53,57d /rocker_scripts/install_tidyverse.sh | bash
 
 pak_pak \
     tidyverse \
@@ -89,17 +88,18 @@ pak_pak \
     cpp11 \
     RcppArmadillo \
     formatR \
-    hexbin
+    hexbin \
+    reticulate
 
 # R.cache (imported by styler) で使用するキャッシュディレクトリを準備
-mkdir -p /home/rstudio/.cache/R/R.cache
-chown -R rstudio:rstudio /home/rstudio/.cache
+mkdir -p /home/${DEFAULT_USER}/.cache/R/R.cache
+chown -R ${DEFAULT_USER}:${DEFAULT_USER} /home/${DEFAULT_USER}/.cache
 
 # Clean up
 Rscript -e "pak::pak_cleanup(force = TRUE)"
 rm -rf /tmp/downloaded_packages
 rm -rf /tmp/Rtmp*
-strip /usr/local/lib/R/site-library/*/libs/*.so
+strip ${R_LIBS_SITE}/*/libs/*.so
 
-apt-get clean
+#apt-get clean
 rm -rf /var/lib/apt/lists/*

@@ -2,7 +2,7 @@
 
 # XeLaTeX + BXjscls で日本語PDFを作成するのに必要なパッケージのインストール
 
-/home/rstudio/.TinyTeX/bin/x86_64-linux/tlmgr install \
+/home/${DEFAULT_USER}/.TinyTeX/bin/x86_64-linux/tlmgr install \
     bxjscls \
     zxjatype \
     zxjafont \
@@ -55,4 +55,4 @@
     zhmetrics-uptex \
     zhnumber
 
-/home/rstudio/.TinyTeX/bin/x86_64-linux/tlmgr path add
+/home/${DEFAULT_USER}/.TinyTeX/bin/x86_64-linux/tlmgr path add
