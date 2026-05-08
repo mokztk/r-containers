@@ -175,7 +175,7 @@ docker run --rm -d \
   --name r_remote \
   mokztk/r_remote:4.5.3
 
-# ssh ruser@localhost:2222
+# ssh -p 2222 ruser@localhost
 ```
 
 起動時のディレクトリは /workspace に設定
