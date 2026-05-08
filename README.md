@@ -9,7 +9,7 @@
     - **`r_remote`**: RStudio server は導入せず、[Positron](https://positron.posit.co/) などから remote SSH 接続するため SSH server を起動
     - **`codeserver_r`**: UIとして、[code-server](https://github.com/coder/code-server) を追加
 
-```shell
+```bash
 # 4つのイメージをまとめて作成
 docker compose build
 
@@ -46,7 +46,7 @@ docker compose up -d codeserver          # codeserver_r
 | pnpm             | 10.33.2               |                            |
 | Microsoft Edit   | 2.0.0                 |                            |
 
-## 共通部分（r_base）
+## 1. 共通部分（r_base）
 
 `rocker/r-ver` に以下のツールを導入する。標準の起動コマンドは root 権限の `R`
 
@@ -61,7 +61,7 @@ docker compose up -d codeserver          # codeserver_r
 - Ubuntu の `language-pack-ja`, `language-pack-ja-base`
 - 環境変数で `ja_JP.UTF-8` ロケールとタイムゾーン `Asia/Tokyo` を指定
 - 日本語フォント
-    - **[Noto Sans/Serif JP](https://fonts.google.com/noto/fonts)**（"CJK" なし）
+    - [Noto Sans/Serif JP](https://fonts.google.com/noto/fonts)（"CJK" なし）
         - `fonts-noto-cjk` は KR, SC, TC のフォントも含むので用途に対して大きすぎる
         - Windows 11 に搭載された Noto Sans/Serif JP（"CJK" なし）と作図コードに互換性が確保できる
         - Github [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk) から個別のOTF版をダウンロードして、Regular, Bold の2ウェイトと Noto Sans Mono CJK JP を手動でインストール
@@ -101,7 +101,7 @@ docker compose up -d codeserver          # codeserver_r
 `docker exec -it ...` で設定を変更する際などのCLI用のテキストエディタがないので、`msedit` の名前で使用できるように導入しておく
 
 
-## RStudio Server イメージ（rstudio）
+## 2. RStudio Server イメージ（rstudio）
 
 ### RStudio Server
 
@@ -110,7 +110,7 @@ docker compose up -d codeserver          # codeserver_r
 - 個人設定は `/home/ruser/.config/rstudio/rstudio-prefs.json`
 - TCP 8787 ポートで待機
 
-```shell
+```bash
 docker run --rm -d \
   -p 8787:8787 \
   -v ./rstudio-prefs.json:/home/ruser/.config/rstudio/rstudio-prefs.json \
@@ -142,7 +142,7 @@ RStudio Serverのエディタ用カスタムフォントとして導入
 Podman の rootless モードで使用する場合は、そのままの rootless モードでは s6-init から RStudio Server が起動できない。
 コンテナ内の一般ユーザーは UID 1000 なので、Linux ホストの UID も 1000 ならば
 
-```shell
+```bash
 podman run --rm -d \
   --userns=keep-id \
   --user root \
@@ -164,11 +164,11 @@ podman run --rm -d \
     - R4.3系以降メンテナンスしていないが、TeX Live 2022 frozen ベースで LuaLaTeX / XeLaTeX で日本語PDFを作成できる環境が準備できるはず
 
 
-## SSH server イメージ（r_remote）
+## 3. SSH server イメージ（r_remote）
 
 パスワード認証（ユーザー・パスワードとも `ruser`）での SSH 接続に加えて、`/home/ruser/.ssh/authorized_keys` に公開鍵を登録すればパスワード不要の公開鍵暗号での接続も可能になる。
 
-```shell
+```bash
 docker run --rm -d \
   -p 2222:22 \
   -v ./id_ed25519.pub:/home/ruser/.ssh/authorized_keys:ro \
@@ -181,7 +181,7 @@ docker run --rm -d \
 起動時のディレクトリは /workspace に設定
 
 
-## code-server イメージ（codeserver_r）
+## 4. code-server イメージ（codeserver_r）
 
 - [公式](https://github.com/coder/code-server) のインストールスクリプトを使用してインストール
 - code-server は TCP 8080、httpgd は TCP 8088 番ポートを使用
@@ -197,7 +197,7 @@ docker run --rm -d \
 - ファイルの自動保存は off (files.autoSave)
 - 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
 
-```shell
+```bash
 docker run --rm -d \
   -p 8080:8080 \
   -p 8088:8088 \
@@ -225,7 +225,7 @@ docker run --rm -d \
 一般ユーザー ruser の場合、pnpm と uv 経由でのパッケージ導入はリリース後1週間以上経過したパッケージのみに制限
 
 
-## History
+## 5. History
 
 - **2020-11-02** [Gist: mokztk/R4.0_2020Oct.Docerfile](https://gist.github.com/mokztk/be9e0d8982fd32987dbb5c9552a9d4a7) から改めてレポジトリとして編集を開始
 - **2020-11-02** 🔖[4.0.2_2020Oct](https://github.com/mokztk/RStudio_docker/releases/tag/4.0.2_2020Oct) : `rocker/tidyverse:4.0.2` 対応版 
