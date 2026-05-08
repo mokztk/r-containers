@@ -1,4 +1,4 @@
-# About this image
+# About this images
 
 - **`rocker/r-ver`** を元に `rocker/tidyverse` 相当のパッケージと日本語設定、頻用パッケージをインストールした作業用イメージ
     - `rocker/tidyverse` 相当のうち、容量の大きな dbplyr database backend は RSQLite 以外を省略
@@ -9,7 +9,7 @@
     - **`r_remote`**: RStudio server は導入せず、[Positron](https://positron.posit.co/) などから remote SSH 接続するため SSH server を起動
     - **`codeserver_r`**: UIとして、[code-server](https://github.com/coder/code-server) を追加
 
-```sell
+```shell
 # 4つのイメージをまとめて作成
 docker compose build
 
@@ -21,9 +21,9 @@ docker compose build codeserver   # codeserver_r
 
 # 個別に起動
 docker run --rm -it mokztk/r_base:4.5.3
-docker run --rm -d -p 8787:8787 --name rstudio mokztk/rstudio:4.5.3
-docker run --rm -d -p 2222:22 --name r_remote mokztk/r_remote:4.5.3
-docker run --rm -d -p 8080:8080 -p 8088:8088 --name codeserver_r mokztk/codeserver_r:4.5.3
+docker compose up -d rstudio             # rstudio
+docker compose up -d ssh                 # r_remote
+docker compose up -d codeserver          # codeserver_r
 ```
 
 | アプリケーション | バージョン            | 備考                       |
@@ -76,7 +76,7 @@ docker run --rm -d -p 8080:8080 -p 8088:8088 --name codeserver_r mokztk/codeserv
 - rocker のスクリプトに倣い、インストール後にDLしたアーカイブや導入された *.so を整理
 - site library を `/opt/R/packages/4.5` に移動
     - `pak::pak()` でパッケージを追加する際に、同じインストール先にないパッケージは他の場所にあっても重複インストールされてしまう
-    - `.libPaths()[1]` が site library になるようにして、一般ユーザー coder が書き込めるように移動・アクセス権の修正を行った
+    - `.libPaths()[1]` が site library になるようにして、一般ユーザー ruser が書き込めるように移動・アクセス権を修正
 
 ### Pandoc / Quarto
 
@@ -110,7 +110,7 @@ docker run --rm -d -p 8080:8080 -p 8088:8088 --name codeserver_r mokztk/codeserv
 - 個人設定は `/home/ruser/.config/rstudio/rstudio-prefs.json`
 - TCP 8787 ポートで待機
 
-```
+```shell
 docker run --rm -d \
   -p 8787:8787 \
   -v ./rstudio-prefs.json:/home/ruser/.config/rstudio/rstudio-prefs.json \
@@ -124,25 +124,31 @@ docker run --rm -d \
 
 RStudio Serverのエディタ用カスタムフォントとして導入
 
-- **[UDEV Gothic](https://github.com/yuru7/udev-gothic)**
+- [UDEV Gothic](https://github.com/yuru7/udev-gothic)
     - @tawara_san 氏作の BIZ UD Gothic + JetBrains Mono の合成フォント
     - 半角:全角 3:5版ではなく、通常の1:2でリガチャ有効のバージョン（UDEVGothicLG-*.ttf）を使用
-- **[Mint Mono](https://github.com/yuru7/mint-mono)**
+- [Mint Mono](https://github.com/yuru7/mint-mono)
     - @tawara_san 氏作の Intel One Mono と Circle M+ 等の合成フォント
     - 半角:全角 3:5版ではなく、通常の1:2のバージョン（MintMono-*.ttf）を使用。リガチャなし
 
 ### 環境変数 PASSWORD の仮設定
 
 - Docker Desktop など `-e PASSWORD=...` が設定できないGUIでも起動テストできるように仮のパスワード `password` を埋め込んでおく
-- 更に、普段使いのため `DISABLE_AUTH=true` を埋め込み基本的にはユーザー認証不要とする。認証が必要なときは、起動時に `-e DISABLE_AUTH=false`
+- 更に、普段使いのため `DISABLE_AUTH=true` を埋め込み基本的にはユーザー認証不要とする
+- 認証が必要なときは、起動時に `-e DISABLE_AUTH=false`
 
 ### rootless モードの設定
 
 Podman の rootless モードで使用する場合は、そのままの rootless モードでは s6-init から RStudio Server が起動できない。
 コンテナ内の一般ユーザーは UID 1000 なので、Linux ホストの UID も 1000 ならば
 
-```
-podman run --rm -d --userns=keep-id --user root -e RUNROOTLESS=false -p 8787:8787 mokztk/rstudio:4.5.3
+```shell
+podman run --rm -d \
+  --userns=keep-id \
+  --user root \
+  -e RUNROOTLESS=false \
+  -p 8787:8787 \
+  mokztk/rstudio:4.5.3
 ```
 
 で起動できる。それ以上は、[公式](https://rocker-project.org/use/rootless-podman.html) 参照のこと。
@@ -162,7 +168,7 @@ podman run --rm -d --userns=keep-id --user root -e RUNROOTLESS=false -p 8787:878
 
 パスワード認証（ユーザー・パスワードとも `ruser`）での SSH 接続に加えて、`/home/ruser/.ssh/authorized_keys` に公開鍵を登録すればパスワード不要の公開鍵暗号での接続も可能になる。
 
-```
+```shell
 docker run --rm -d \
   -p 2222:22 \
   -v ./id_ed25519.pub:/home/ruser/.ssh/authorized_keys:ro \
@@ -191,7 +197,7 @@ docker run --rm -d \
 - ファイルの自動保存は off (files.autoSave)
 - 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
 
-```
+```shell
 docker run --rm -d \
   -p 8080:8080 \
   -p 8088:8088 \
