@@ -165,7 +165,7 @@ podman run --rm -d --userns=keep-id --user root -e RUNROOTLESS=false -p 8787:878
 ```
 docker run --rm -d \
   -p 2222:22 \
-  -v ./id_ed25519.pub:/home/rstudio/.ssh/authorized_keys:ro \
+  -v ./id_ed25519.pub:/home/ruser/.ssh/authorized_keys:ro \
   --name r_remote \
   mokztk/r_remote:4.5.3
 
@@ -182,11 +182,20 @@ docker run --rm -d \
 - 設定ファイル用に、`/home/ruser/.local/share/code-server/User/settings.json` に所有者 ruser の空ファイルを作成済
 - 起動時のディレクトリは /workspace に設定
 
+#### settings.json 見本ファイル
+
+- R 用コンソールは `radian` (r.rterm.linux)
+- R のグラフィックデバイスは `httpgd::hgd()` (r.plot.useHttpgd)
+- タブ設定はスペース 2文字分 (editor.tabSize)
+- Air, Quarto 拡張機能による保存時の自動整形は off (editor.formatOnSave)
+- ファイルの自動保存は off (files.autoSave)
+- 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
+
 ```
 docker run --rm -d \
   -p 8080:8080 \
   -p 8088:8088 \
-  -v ./settings.json:/home/coder/.local/share/code-server/User/settings.json \
+  -v ./settings.json:/home/ruser/.local/share/code-server/User/settings.json \
   --name codeserver_r \
   mokztk/codeserver_r:4.5.3
 
@@ -205,19 +214,9 @@ docker run --rm -d \
     - `Shift + Ctrl + m` で `|>` を挿入（R, Rmd, Quarto）
     - `Shift + Ctrl + c` で行コメントの切り替え（デフォルトは `Ctrl + /`）
 
-#### settings.json 見本ファイル
-
-- R 用コンソールは `radian` (r.rterm.linux)
-- R のグラフィックデバイスは `httpgd::hgd()` (r.plot.useHttpgd)
-- タブ設定はスペース 2文字分 (editor.tabSize)
-- Air, Quarto 拡張機能による保存時の自動整形は off (editor.formatOnSave)
-- ファイルの自動保存は off (files.autoSave)
-- 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
-
 ### dependency cooldown
 
 一般ユーザー ruser の場合、pnpm と uv 経由でのパッケージ導入はリリース後1週間以上経過したパッケージのみに制限
-
 
 
 ## History
