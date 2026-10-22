@@ -73,31 +73,6 @@ cat << EOF > ~/.local/share/code-server/User/keybindings.json
 EOF
 
 #-------------------------------
-#  radian
-#-------------------------------
-
-cat << EOF > ~/.radian_profile
-options(
-  radian.auto_match = TRUE,
-  radian.highlight_matching_bracket = TRUE,
-  radian.prompt = "\033[1;35mr$>\033[0m ",
-  radian.escape_key_map = list(
-    list(key = "m", value = " |> ")
-  ),
-  radian.force_reticulate_python = TRUE
-)
-EOF
-
-#-------------------------------
-#  PNPM
-#-------------------------------
-
-# 安全のため、リリース後1週間以上経ったパッケージのみインストールできるようにする
-
-SHELL=/usr/bin/bash pnpm setup
-pnpm config set --location=global minimumReleaseAge 10080
-
-#-------------------------------
 #  uv
 #-------------------------------
 
