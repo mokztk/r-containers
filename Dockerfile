@@ -53,6 +53,14 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 # uv (Python manager) & Python environment
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
 
+# arf: Alternative R Frontend
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then ARF_ARCH="x86_64"; \
+    elif [ "$ARCH" = "aarch64" ]; then ARF_ARCH="aarch64"; fi && \
+    curl -fsSL "https://github.com/randy3k/arf/releases/latest/download/arf-linux-${ARF_ARCH}.tar.gz" \
+    | tar -xz -C /usr/local/bin/ \
+    && chmod +x /usr/local/bin/arf
+
 # Microsoft Edit
 RUN wget -O msedit.tar.gz \
         https://github.com/microsoft/edit/releases/download/v2.0.0/edit-2.0.0-`uname -m`-linux-gnu.tar.gz \
