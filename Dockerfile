@@ -57,7 +57,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then ARF_ARCH="x86_64"; \
     elif [ "$ARCH" = "aarch64" ]; then ARF_ARCH="aarch64"; fi && \
-    curl -fsSL "https://github.com/randy3k/arf/releases/latest/download/arf-linux-${ARF_ARCH}.tar.gz" \
+    curl -fsSL "https://github.com/eitsupi/arf/releases/download/v0.6.0/arf-console-${ARF_ARCH}-unknown-linux-gnu.tar.xz" \
     | tar -xz -C /usr/local/bin/ \
     && chmod +x /usr/local/bin/arf
 
