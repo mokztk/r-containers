@@ -54,14 +54,10 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
 
 # Microsoft Edit
-RUN mkdir -p /opt/msedit/ \
-    && wget -O /opt/msedit/msedit.tar.gz \
+RUN wget -O msedit.tar.gz \
         https://github.com/microsoft/edit/releases/download/v2.0.0/edit-2.0.0-`uname -m`-linux-gnu.tar.gz \
-    && cd /opt/msedit \
     && tar -xzf msedit.tar.gz \
-    && mkdir -p /home/${DEFAULT_USER}/.local/bin \
-    && chown -R ${DEFAULT_USER}:${DEFAULT_USER} /home/${DEFAULT_USER}/.local/ \ 
-    && ln -s /opt/msedit/edit /home/${DEFAULT_USER}/.local/bin/msedit \
+    && mv ./edit /usr/local/bin \
     && rm msedit.tar.gz
 
 # R の site library を一般ユーザー coder でも書き込みできる場所に移す
