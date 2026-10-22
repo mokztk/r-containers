@@ -54,19 +54,13 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
 
 # arf: Alternative R Frontend
-RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ]; then ARF_ARCH="x86_64"; \
-    elif [ "$ARCH" = "aarch64" ]; then ARF_ARCH="aarch64"; fi && \
-    curl -fsSL "https://github.com/eitsupi/arf/releases/download/v0.6.0/arf-console-${ARF_ARCH}-unknown-linux-gnu.tar.xz" \
-    | tar -xz -C /usr/local/bin/ \
-    && chmod +x /usr/local/bin/arf
+RUN curl -fsSL https://github.com/eitsupi/arf/releases/download/v0.6.0/arf-console-`uname -m`-unknown-linux-gnu.tar.xz \
+    | tar -Jx --strip-components 1 -C /usr/local/bin/
 
 # Microsoft Edit
-RUN wget -O msedit.tar.gz \
-        https://github.com/microsoft/edit/releases/download/v2.0.0/edit-2.0.0-`uname -m`-linux-gnu.tar.gz \
-    && tar -xzf msedit.tar.gz \
-    && mv ./edit /usr/local/bin \
-    && rm msedit.tar.gz
+RUN curl -fsSL https://github.com/microsoft/edit/releases/download/v2.0.0/edit-2.0.0-`uname -m`-linux-gnu.tar.gz \
+    | tar -xz \
+    && mv ./edit /usr/local/bin/msedit
 
 # R の site library を一般ユーザー coder でも書き込みできる場所に移す
 ENV R_LIBS_SITE=/opt/R/packages/4.6
