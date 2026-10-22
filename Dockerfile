@@ -5,7 +5,7 @@
 ARG BUILDKIT_INLINE_CACHE=1
 ARG TARGETPLATFORM
 
-FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.3 AS base_stacks
+FROM --platform=$TARGETPLATFORM rocker/r-ver:4.6.0 AS base_stacks
 
 LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
@@ -13,8 +13,8 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 各種ツールのバージョン指定
-ENV PANDOC_VERSION="3.9.0.2"
-ENV QUARTO_VERSION="1.9.36"
+ENV PANDOC_VERSION="3.10"
+ENV QUARTO_VERSION="1.9.37"
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # 以降も何度か apt-get を使うので BuildKit のキャッシュマウント機能を使う
@@ -51,7 +51,7 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     && sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
 
 # uv (Python manager) & Python environment
-COPY --from=ghcr.io/astral-sh/uv:0.11.9 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
 
 # Microsoft Edit
 RUN mkdir -p /opt/msedit/ \
@@ -65,7 +65,7 @@ RUN mkdir -p /opt/msedit/ \
     && rm msedit.tar.gz
 
 # R の site library を一般ユーザー coder でも書き込みできる場所に移す
-ENV R_LIBS_SITE=/opt/R/packages/4.5
+ENV R_LIBS_SITE=/opt/R/packages/4.6
 ENV R_LIBS=${R_LIBS_SITE}:/usr/local/lib/R/library
 
 COPY --chmod=755 my_scripts/install_r_packages_pak.sh my_scripts/install_notojp.sh /my_scripts/
@@ -112,9 +112,9 @@ FROM base_stacks AS rstudio
 
 LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
-# rocker/rstudio:4.5.3 に合わせる
+# rocker/rstudio:4.6.0 に合わせる
 ENV S6_VERSION="v2.1.0.2"
-ENV RSTUDIO_VERSION="2026.04.0+526"
+ENV RSTUDIO_VERSION="2026.05.1+225"
 
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     apt-get update \
@@ -157,7 +157,7 @@ FROM base_stacks AS codeserver
 
 LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
-ENV CODESERVER_VERSION="4.117.0"
+ENV CODESERVER_VERSION="4.141.0"
 
 # code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version ${CODESERVER_VERSION}
