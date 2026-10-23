@@ -12,9 +12,9 @@ code-server --install-extension RDebugger.r-debugger
 code-server --install-extension quarto.quarto
 code-server --install-extension christian-kohler.path-intellisense
 code-server --install-extension mechatroner.rainbow-csv
-code-server --install-extension JanisX11.excel-viewer
+code-server --install-extension grapecity.gc-excelviewer
 code-server --install-extension usernamehw.errorlens
-code-server --install-extension wwm.better-align
+code-server --install-extension chouzz.vscode-better-align
 
 # 設定ファイルを docker run -v でマウントするための空ファイル
 # 所有者を ${DEFAULT_USER} にして準備しておかないと root になってしまい変更が書き込めない
