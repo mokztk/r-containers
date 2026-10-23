@@ -1,0 +1,14 @@
+# ignore all
+**
+
+# white list
+!.gitignore
+!Dockerfile
+!.dockerignore
+!.docker-compose.yml
+!settings.json
+!README.md
+!package_list.*
+!my_scripts/*
+!utils/*
+
