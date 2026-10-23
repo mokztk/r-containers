@@ -50,7 +50,9 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     sed -e "16,26d" -e "85d" /rocker_scripts/install_pandoc.sh | bash \
     && sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
 
-# uv (Python manager) & Python environment
+# uv (Python manager) 
+# Python はシステムの python 3.12.3 を優先使用
+ENV UV_PYTHON_PREFERENCE=system
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
 
 # arf: Alternative R Frontend
