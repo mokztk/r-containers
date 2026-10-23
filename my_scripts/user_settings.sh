@@ -24,7 +24,7 @@ touch ~/.local/share/code-server/User/settings.json
 # Rのグラフィックデバイスとして httpgd::hgd() を使う設定とコード整形
 # settings.json で "r.plot.backend": "httpgd" が必要
 
-cat << EOF >> /home/${DEFAULT_USER}/.Rprofile
+cat << 'EOF' >> /home/${DEFAULT_USER}/.Rprofile
 
 options(
   # use httpgd::hgd() for preview R plots

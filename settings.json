@@ -15,14 +15,19 @@
     "r.bracketedPaste": true,
     "r.lsp.enabled": true,
     "[r]": {
-	    "editor.defaultFormatter": "REditorSupport.r",
-	    "editor.formatOnSave": true,
+        "editor.defaultFormatter": "REditorSupport.r",
+        "editor.formatOnSave": true,
+        "editor.wordBasedSuggestions": "matchingDocuments"
+    },
+    "[rmd]": {
+        "editor.defaultFormatter": "REditorSupport.r",
+        "editor.formatOnSave": true,
         "editor.wordBasedSuggestions": "matchingDocuments"
     },
     "quarto.path": "/opt/quarto/bin/quarto",
     "quarto.render.renderOnSave": true,
     "[quarto]": {
-	    "editor.defaultFormatter": "REditorSupport.r",
+        "editor.defaultFormatter": "quarto.quarto",
         "editor.formatOnSave": true
     },
     // ブラケットの標準色分け（拡張機能なしでVS Code本体機能を利用）
