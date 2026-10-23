@@ -21,17 +21,26 @@ code-server --install-extension chouzz.vscode-better-align
 mkdir -p ~/.config/code-server
 touch ~/.local/share/code-server/User/settings.json
 
-# Rのグラフィックデバイスとして httpgd::hgd() を使う設定
-# settings.json で "r.plot.useHttpgd": true が必要
+# Rのグラフィックデバイスとして httpgd::hgd() を使う設定とコード整形
+# settings.json で "r.plot.backend": "httpgd" が必要
 
 cat << EOF >> /home/${DEFAULT_USER}/.Rprofile
 
-# use httpgd::hgd() for preview R plots
 options(
-  device = "httpgd",
-  httpgd.host = "0.0.0.0",
-  httpgd.port = 8088,
-  httpgd.token = ""
+  # use httpgd::hgd() for preview R plots
+  device       = "httpgd",
+  httpgd.host  = "0.0.0.0",
+  httpgd.port  = 8088,
+  httpgd.token = "",
+  
+  # code formatting
+  languageserver.formatting_style = function(options) {
+    styler::tidyverse_style(
+      indent_by = options$tabSize,
+      strict    = FALSE,
+      scope     = "line_breaks"
+    )
+  }
 )
 
 EOF
