@@ -4,7 +4,7 @@
     - `rocker/tidyverse` 相当のうち、容量の大きな dbplyr database backend は RSQLite 以外を省略
 - もともと、`rocker/tidyverse` を元に作成していた RStudio server / SSH server イメージと code-server を用いたイメージ [mokztk/codeserver_r](https://github.com/mokztk/codeserver_r) を一本化
 - 使用方法別に、4つのイメージを生成
-    - **`r_base`**: `rocker/r-ver` に各種パッケージ、python、Node、日本語環境などを導入した共通部分
+    - **`r_base`**: `rocker/r-ver` に各種パッケージ、日本語環境などを導入した共通部分
     - **`rstudio`**: rocker project オリジナルのインストールスクリプトで `rocker/rstudio` 相当の機能を追加
     - **`r_remote`**: RStudio server は導入せず、[Positron](https://positron.posit.co/) などから remote SSH 接続するため SSH server を起動
     - **`codeserver_r`**: UIとして、[code-server](https://github.com/coder/code-server) を追加
@@ -28,22 +28,18 @@ docker compose up -d codeserver          # codeserver_r
 
 | アプリケーション | バージョン            | 備考                       |
 |------------------|-----------------------|----------------------------|
-| ベースイメージ   | rocker/r-ver:4.5.3    |                            |
-| R                | 4.5.3                 |                            |
-| RStudio server   | 2026.04.0+526         | rocker/rstudio:4.5.3 準拠  |
-| code-server      | 4.117.0               |                            |
-| R languageserver | 0.3.17                | RSPM@2026-04-23            |
-| httpgd           | 2.1.4                 | RSPM@2026-04-23            |
-| radian           | 0.6.15                |                            |
-| Pandoc           | 3.9.0.2               | rocker/rstudio:4.5.3 準拠  |
-| Quarto           | 1.9.36                | rocker/rstudio:4.5.3 準拠  |
+| ベースイメージ   | rocker/r-ver:4.6.0    |                            |
+| R                | 4.6.0                 |                            |
+| RStudio server   | 2026.05.1+225         | rocker/rstudio:4.6.0 準拠  |
+| code-server      | 4.141.0               |                            |
+| R languageserver | 0.3.187               | RSPM@2026-06-23            |
+| httpgd           | 2.1.4                 | RSPM@2026-06-23            |
+| arf              | 0.6.0                 |                            |
+| Pandoc           | 3.10                  | rocker/rstudio:4.6.0 準拠  |
+| Quarto           | 1.9.37                | rocker/rstudio:4.6.0 準拠  |
 | Typst            | 0.14.2                | Quarto 同梱                |
-| Python3          | 3.12.13               |                            |
-| Node.js          | 24.15.0               | Active LTS                 |
-| uv               | 0.11.9                |                            |
-| n                | 10.2.0                |                            |
-| npm              | 11.13.0               |                            |
-| pnpm             | 10.33.2               |                            |
+| Python3          | 3.12.3                | ubuntu 24.04               |
+| uv               | 0.13.5                |                            |
 | Microsoft Edit   | 2.0.0                 |                            |
 
 ## 1. 共通部分（r_base）
@@ -74,27 +70,24 @@ docker compose up -d codeserver          # codeserver_r
     - [インストール済みのパッケージ一覧](package_list.md)
 - インストールの高速化、システム依存パッケージの導入をスムーズにするため `pak::pak()` を活用
 - rocker のスクリプトに倣い、インストール後にDLしたアーカイブや導入された *.so を整理
-- site library を `/opt/R/packages/4.5` に移動
+- site library を `/opt/R/packages/4.6` に移動
     - `pak::pak()` でパッケージを追加する際に、同じインストール先にないパッケージは他の場所にあっても重複インストールされてしまう
     - `.libPaths()[1]` が site library になるようにして、一般ユーザー ruser が書き込めるように移動・アクセス権を修正
 
 ### Pandoc / Quarto
 
-`rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.5.3` と同じバージョンをインストール
+`rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.6.0` と同じバージョンをインストール
 
-### Python3 / radian
+### arf: Alternative R Frontend
 
-- インストール高速化のため、[uv](https://docs.astral.sh/uv/) を導入
-- 公式の `/rocker_scripts/install_python.sh` と同様に仮想環境 `/opt/venv` を作る（プロジェクトとしての `uv init` はなし）
-- `reticulate` の運用を考慮し、Numpy / Pandas をインストールしておく
-    - Numpy 1.26
-    - Pandas 3.0.1
-- [radian: A 21 century R console](https://github.com/randy3k/radian) を導入
+- "no longer under active development" となった [radian](https://github.com/randy3k/radian) から [arf](https://github.com/eitsupi/arf) に変更
+- Python製の radian と異なり arf は Rust製のため、イメージへの Python のインストールは縮小する
 
-### Node.js / npm / pnpm
+### Python3
 
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli) などを導入できるよう、 [n](https://github.com/tj/n) 経由で Ubuntu の apt にあるバージョンより新しいものを導入
-- 2026-04 現在の Active LTS である Node v24系＋ npm v11系
+- パッケージ等のインストール高速化のため、[uv](https://docs.astral.sh/uv/) を導入しておく
+- システム（ubuntu）の `python3` を最小限でインストールしておき、そちらの使用を優先する
+- 必要に応じて、PEP 723 (Inline script metadata) あるいは `uv init` などで対応
 
 ### [Microsoft Edit](https://github.com/microsoft/edit)
 
@@ -105,7 +98,7 @@ docker compose up -d codeserver          # codeserver_r
 
 ### RStudio Server
 
-- `rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.5.3` と同じバージョンをインストール
+- `rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.6.0` と同じバージョンをインストール
 - 起動時のディレクトリは /workspace
 - 個人設定は `/home/ruser/.config/rstudio/rstudio-prefs.json`
 - TCP 8787 ポートで待機
@@ -115,7 +108,7 @@ docker run --rm -d \
   -p 8787:8787 \
   -v ./rstudio-prefs.json:/home/ruser/.config/rstudio/rstudio-prefs.json \
   --name rstudio \
-  mokztk/rstudio:4.5.3
+  mokztk/rstudio:4.6.0
   
 # http://localhost:8787/
 ```
@@ -148,7 +141,7 @@ podman run --rm -d \
   --user root \
   -e RUNROOTLESS=false \
   -p 8787:8787 \
-  mokztk/rstudio:4.5.3
+  mokztk/rstudio:4.6.0
 ```
 
 で起動できる。それ以上は、[公式](https://rocker-project.org/use/rootless-podman.html) 参照のこと。
@@ -173,7 +166,7 @@ docker run --rm -d \
   -p 2222:22 \
   -v ./id_ed25519.pub:/home/ruser/.ssh/authorized_keys:ro \
   --name r_remote \
-  mokztk/r_remote:4.5.3
+  mokztk/r_remote:4.6.0
 
 # ssh -p 2222 ruser@localhost
 ```
@@ -190,10 +183,11 @@ docker run --rm -d \
 
 #### settings.json 見本ファイル
 
-- R 用コンソールは `radian` (r.rterm.linux)
-- R のグラフィックデバイスは `httpgd::hgd()` (r.plot.useHttpgd)
+- R 用コンソールは `arf` (r.consolePath)
+- R のグラフィックデバイスは `httpgd::hgd()` (r.plot.backend)
+    - コンテナのホスト名をを `127.0.0.1` へ転送される `localtest.me` にしておくことで、R Plot パネルの "Open in External Browser" で httpgd のタブを開くことが出来る
 - タブ設定はスペース 2文字分 (editor.tabSize)
-- Air, Quarto 拡張機能による保存時の自動整形は off (editor.formatOnSave)
+- REditorSupport, Quarto 拡張機能による保存時の自動整形を有効化 (editor.formatOnSave)
 - ファイルの自動保存は off (files.autoSave)
 - 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
 
@@ -201,28 +195,34 @@ docker run --rm -d \
 docker run --rm -d \
   -p 8080:8080 \
   -p 8088:8088 \
+  --hostname localtest.me \
   -v ./settings.json:/home/ruser/.local/share/code-server/User/settings.json \
   --name codeserver_r \
-  mokztk/codeserver_r:4.5.3
+  mokztk/codeserver_r:4.6.0
 
 # http://localhost:8080/      # code-server
-# http://localhost:8088/live  # httpgd
+# http://localtest.me:8088/live  # httpgd
 ```
 
 - 拡張機能 
     - REditorSupport (REditorSupport.r)
-    - Air - R Language Support (posit.air-vscode)
+    - R Debugger (RDebugger.r-debugger)
     - Quarto (quarto.quarto)
-    - Gemini Code Assist (Google.geminicodeassist)
+    - Better Align (chouzz.vscode-better-align)
+    - Error Lens (usernamehw.errorlens)
+    - Path Intellisense (christian-kohler.path-intellisense)
+    - Rainbow CSV (mechatroner.rainbow-csv)
+    - Excel Viewer (grapecity.gc-excelviewer)
 - Language Server
     - R `{languageserver}`
 - RStudio と同様のキーボードショートカット
     - `Shift + Ctrl + m` で `|>` を挿入（R, Rmd, Quarto）
     - `Shift + Ctrl + c` で行コメントの切り替え（デフォルトは `Ctrl + /`）
+    - `F1` でヘルプのパネルを開く
 
 ### dependency cooldown
 
-一般ユーザー ruser の場合、pnpm と uv 経由でのパッケージ導入はリリース後1週間以上経過したパッケージのみに制限
+一般ユーザー ruser の場合、uv 経由でのパッケージ導入はリリース後1週間以上経過したパッケージのみに制限
 
 
 ## 5. History
@@ -250,3 +250,4 @@ docker run --rm -d \
 - **2025-11-04** 🔖[4.5.1_2025Nov](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.1_2025Nov) : `rocker/r-ver:4.5.1` ベースに更新
 - **2026-03-13** 🔖[4.5.2_2026Mar](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.2_2026Mar) : `rocker/r-ver:4.5.2` ベースに更新
 - **2026-05-08** 🔖[4.5.3_2026May](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.3_2026May) : `rocker/r-ver:4.5.3` ベースに更新。code-server 版と一本化。
+- 2026-10-23 : Node、Python関連の整理、code-server 拡張機能の再編（4.6.x 系の準備）
