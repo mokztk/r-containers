@@ -27,7 +27,8 @@ function pak_pak() {
 
 pak_pak \
     languageserver \
-    httpgd
+    httpgd \
+    styler
 
 # rocker/tidyverse 相当のパッケージ
 # 容量の大きな database backend は RSQLite 以外省略（行番号は @2b91d04 準拠）

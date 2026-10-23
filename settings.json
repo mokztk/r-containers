@@ -1,25 +1,44 @@
 {
-    "r.rterm.linux": "/opt/venv/bin/radian",
-    "r.plot.useHttpgd": true,
-    "r.plot.defaults.fullWindowMode": true,
-    "r.bracketedPaste": true,
-    "r.lsp.enabled": true,
-    "[r]": {
-        "editor.defaultFormatter": "posit.air-vscode",
-        "editor.formatOnSave": false,
-        "editor.wordBasedSuggestions": "matchingDocuments"
-    },
-    "quarto.path": "/opt/quarto/bin/quarto",
-    "quarto.render.renderOnSave": true,
-    "[quarto]": {
-        "editor.defaultFormatter": "quarto.quarto",
-        "editor.formatOnSave": false
-    },
+    // エディタ全般
     "editor.wordWrap": "on",
     "editor.minimap.enabled": false,
     "workbench.colorTheme": "Visual Studio Light",
     "remote.autoForwardPortsSource": "hybrid",
     "editor.tabSize": 2,
     "files.autoSave": "off",
-    "terminal.integrated.defaultProfile.linux": "R Terminal"
+    // R用設定
+    "r.consolePath": "/usr/local/bin/arf",
+    "r.interactive.arfPath": "/usr/local/bin/arf",
+    "terminal.integrated.defaultProfile.linux": "R Terminal",
+    "r.plot.backend": "httpgd",
+    "r.plot.defaults.fullWindowMode": true,
+    "r.bracketedPaste": true,
+    "r.lsp.enabled": true,
+    "[r]": {
+        "editor.defaultFormatter": "REditorSupport.r",
+        "editor.formatOnSave": true,
+        "editor.wordBasedSuggestions": "matchingDocuments"
+    },
+    "[rmd]": {
+        "editor.defaultFormatter": "REditorSupport.r",
+        "editor.formatOnSave": true,
+        "editor.wordBasedSuggestions": "matchingDocuments"
+    },
+    "quarto.path": "/opt/quarto/bin/quarto",
+    "quarto.render.renderOnSave": true,
+    "[quarto]": {
+        "editor.defaultFormatter": "quarto.quarto",
+        "editor.formatOnSave": true
+    },
+    // ブラケットの標準色分け（拡張機能なしでVS Code本体機能を利用）
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    // Path Intellisense: 相対パスの基点をワークスペースに設定
+    "path-intellisense.absolutePathToWorkspace": true,
+    // Error Lens: Rの文法エラーを主張しすぎない程度に見やすく調整
+    "errorLens.enabledDiagnosticLevels": [
+        "error",
+        "warning"
+    ],
+    "errorLens.delay": 300
 }

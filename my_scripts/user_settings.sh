@@ -8,26 +8,39 @@
 
 # VS Code plugins
 code-server --install-extension REditorSupport.r
-code-server --install-extension posit.air-vscode
-code-server --install-extension Google.geminicodeassist
+code-server --install-extension RDebugger.r-debugger
 code-server --install-extension quarto.quarto
+code-server --install-extension christian-kohler.path-intellisense
+code-server --install-extension mechatroner.rainbow-csv
+code-server --install-extension grapecity.gc-excelviewer
+code-server --install-extension usernamehw.errorlens
+code-server --install-extension chouzz.vscode-better-align
 
 # 設定ファイルを docker run -v でマウントするための空ファイル
 # 所有者を ${DEFAULT_USER} にして準備しておかないと root になってしまい変更が書き込めない
 mkdir -p ~/.config/code-server
 touch ~/.local/share/code-server/User/settings.json
 
-# Rのグラフィックデバイスとして httpgd::hgd() を使う設定
-# settings.json で "r.plot.useHttpgd": true が必要
+# Rのグラフィックデバイスとして httpgd::hgd() を使う設定とコード整形
+# settings.json で "r.plot.backend": "httpgd" が必要
 
-cat << EOF >> /home/${DEFAULT_USER}/.Rprofile
+cat << 'EOF' >> /home/${DEFAULT_USER}/.Rprofile
 
-# use httpgd::hgd() for preview R plots
 options(
-  device = "httpgd",
-  httpgd.host = "0.0.0.0",
-  httpgd.port = 8088,
-  httpgd.token = ""
+  # use httpgd::hgd() for preview R plots
+  device       = "httpgd",
+  httpgd.host  = "0.0.0.0",
+  httpgd.port  = 8088,
+  httpgd.token = "",
+  
+  # code formatting
+  languageserver.formatting_style = function(options) {
+    styler::tidyverse_style(
+      indent_by = options$tabSize,
+      strict    = FALSE,
+      scope     = "line_breaks"
+    )
+  }
 )
 
 EOF
@@ -68,34 +81,21 @@ cat << EOF > ~/.local/share/code-server/User/keybindings.json
         "key": "ctrl+/",
         "command": "-editor.action.commentLine",
         "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "shift+f1",
+        "command": "workbench.action.showCommands"
+    },
+    {
+        "key": "f1",
+        "command": "-workbench.action.showCommands"
+    },
+    {
+        "key": "f1",
+        "command": "r.helpPanel.openForSelection"
     }
 ]
 EOF
-
-#-------------------------------
-#  radian
-#-------------------------------
-
-cat << EOF > ~/.radian_profile
-options(
-  radian.auto_match = TRUE,
-  radian.highlight_matching_bracket = TRUE,
-  radian.prompt = "\033[1;35mr$>\033[0m ",
-  radian.escape_key_map = list(
-    list(key = "m", value = " |> ")
-  ),
-  radian.force_reticulate_python = TRUE
-)
-EOF
-
-#-------------------------------
-#  PNPM
-#-------------------------------
-
-# 安全のため、リリース後1週間以上経ったパッケージのみインストールできるようにする
-
-SHELL=/usr/bin/bash pnpm setup
-pnpm config set --location=global minimumReleaseAge 10080
 
 #-------------------------------
 #  uv
