@@ -81,6 +81,18 @@ cat << EOF > ~/.local/share/code-server/User/keybindings.json
         "key": "ctrl+/",
         "command": "-editor.action.commentLine",
         "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "shift+f1",
+        "command": "workbench.action.showCommands"
+    },
+    {
+        "key": "f1",
+        "command": "-workbench.action.showCommands"
+    },
+    {
+        "key": "f1",
+        "command": "r.helpPanel.openForSelection"
     }
 ]
 EOF
