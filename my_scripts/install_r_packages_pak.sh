@@ -55,11 +55,13 @@ pak_pak \
     quarto \
     tidylog \
     furrr \
+    skimr \
     glmnetUtils \
     glmmTMB \
     ggeffects \
     pROC \
     cmprsk \
+    tidycmprsk \
     car \
     mice \
     ggmice \
