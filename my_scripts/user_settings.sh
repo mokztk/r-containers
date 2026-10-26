@@ -12,7 +12,7 @@ code-server --install-extension RDebugger.r-debugger
 code-server --install-extension quarto.quarto
 code-server --install-extension christian-kohler.path-intellisense
 code-server --install-extension mechatroner.rainbow-csv
-code-server --install-extension grapecity.gc-excelviewer
+code-server --install-extension cweijan.vscode-office
 code-server --install-extension usernamehw.errorlens
 code-server --install-extension chouzz.vscode-better-align
 
