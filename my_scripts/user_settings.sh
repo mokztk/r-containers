@@ -6,15 +6,16 @@
 #  code-server
 #-------------------------------
 
-# VS Code plugins
-code-server --install-extension REditorSupport.r
-code-server --install-extension RDebugger.r-debugger
-code-server --install-extension quarto.quarto
-code-server --install-extension christian-kohler.path-intellisense
-code-server --install-extension mechatroner.rainbow-csv
-code-server --install-extension cweijan.vscode-office
-code-server --install-extension usernamehw.errorlens
-code-server --install-extension chouzz.vscode-better-align
+# VS Code 拡張機能
+# 動作を確認したバージョンに固定し、拡張機能の自動更新は止めておく
+code-server --install-extension REditorSupport.r@3.2.0
+code-server --install-extension RDebugger.r-debugger@0.5.6
+code-server --install-extension quarto.quarto@1.139.0
+code-server --install-extension christian-kohler.path-intellisense@2.8.0
+code-server --install-extension mechatroner.rainbow-csv@3.24.1
+code-server --install-extension cweijan.vscode-office@4.2.3
+code-server --install-extension usernamehw.errorlens@3.30.0
+code-server --install-extension chouzz.vscode-better-align@1.4.5
 
 # arfとhttpgdを有効にするための最小限の設定
 # docker run -v で上書きマウントする前提
@@ -24,6 +25,9 @@ mkdir -p ~/.config/code-server/
 
 cat << 'EOF' > ~/.local/share/code-server/User/settings.json
 {
+    "remote.autoForwardPortsSource": "hybrid",
+    "extensions.autoUpdate": false,
+    "extensions.autoCheckUpdates": false,
     "r.consolePath": "/usr/local/bin/arf",
     "r.interactive.arfPath": "/usr/local/bin/arf",
     "terminal.integrated.defaultProfile.linux": "R Terminal",
