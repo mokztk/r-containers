@@ -16,10 +16,21 @@ code-server --install-extension cweijan.vscode-office
 code-server --install-extension usernamehw.errorlens
 code-server --install-extension chouzz.vscode-better-align
 
-# 設定ファイルを docker run -v でマウントするための空ファイル
-# 所有者を ${DEFAULT_USER} にして準備しておかないと root になってしまい変更が書き込めない
-mkdir -p ~/.config/code-server
-touch ~/.local/share/code-server/User/settings.json
+# arfとhttpgdを有効にするための最小限の設定
+# docker run -v で上書きマウントする前提
+
+mkdir -p ~/.config/code-server/
+# touch ~/.local/share/code-server/User/settings.json
+
+cat << 'EOF' > ~/.local/share/code-server/User/settings.json
+{
+    "r.consolePath": "/usr/local/bin/arf",
+    "r.interactive.arfPath": "/usr/local/bin/arf",
+    "terminal.integrated.defaultProfile.linux": "R Terminal",
+    "r.plot.backend": "httpgd",
+    "r.lsp.enabled": true
+}
+EOF
 
 # Rのグラフィックデバイスとして httpgd::hgd() を使う設定とコード整形
 # settings.json で "r.plot.backend": "httpgd" が必要
