@@ -31,6 +31,7 @@ mkdir -p ~/.config/code-server/
 
 cat << 'EOF' > ~/.local/share/code-server/User/settings.json
 {
+    "editor.tabSize": 2,
     "remote.autoForwardPortsSource": "hybrid",
     "extensions.autoUpdate": false,
     "extensions.autoCheckUpdates": false,
@@ -38,7 +39,8 @@ cat << 'EOF' > ~/.local/share/code-server/User/settings.json
     "r.interactive.arfPath": "/usr/local/bin/arf",
     "terminal.integrated.defaultProfile.linux": "R Terminal",
     "r.plot.backend": "httpgd",
-    "r.lsp.enabled": true
+    "r.lsp.enabled": true,
+    "r.bracketedPaste": true
 }
 EOF
 
