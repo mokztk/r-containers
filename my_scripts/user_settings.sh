@@ -17,6 +17,12 @@ code-server --install-extension cweijan.vscode-office@4.2.3
 code-server --install-extension usernamehw.errorlens@3.30.0
 code-server --install-extension chouzz.vscode-better-align@1.4.5
 
+# REditorSupport.r に同梱されている {sess} をインストール
+SESS_DIR=$(find /home/ruser -path "*/reditorsupport.r*/*/sess" 2>/dev/null | head -n 1)
+if [ -n "$SESS_DIR" ]; then
+    R CMD INSTALL "$SESS_DIR";
+fi
+
 # arfとhttpgdを有効にするための最小限の設定
 # docker run -v で上書きマウントする前提
 
