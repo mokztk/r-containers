@@ -20,7 +20,7 @@ docker compose build ssh          # r_remote
 docker compose build codeserver   # codeserver_r
 
 # 個別に起動
-docker run --rm -it mokztk/r_base:4.5.3
+docker run --rm -it mokztk/r_base:4.6.1
 docker compose up -d rstudio             # rstudio
 docker compose up -d ssh                 # r_remote
 docker compose up -d codeserver          # codeserver_r
@@ -28,18 +28,16 @@ docker compose up -d codeserver          # codeserver_r
 
 | アプリケーション | バージョン            | 備考                       |
 |------------------|-----------------------|----------------------------|
-| ベースイメージ   | rocker/r-ver:4.6.0    |                            |
-| R                | 4.6.0                 |                            |
-| RStudio server   | 2026.05.1+225         | rocker/rstudio:4.6.0 準拠  |
-| code-server      | 4.141.0               |                            |
-| R languageserver | 0.3.187               | RSPM@2026-06-23            |
-| httpgd           | 2.1.4                 | RSPM@2026-06-23            |
+| ベースイメージ   | rocker/r-ver:4.6.1    |                            |
+| R                | 4.6.1                 |                            |
+| RStudio server   | 2026.10.1+239         | rocker/rstudio:4.6.1 準拠  |
+| code-server      | 4.144.0               |                            |
 | arf              | 0.6.0                 |                            |
-| Pandoc           | 3.10                  | rocker/rstudio:4.6.0 準拠  |
-| Quarto           | 1.9.37                | rocker/rstudio:4.6.0 準拠  |
-| Typst            | 0.14.2                | Quarto 同梱                |
+| Pandoc           | 3.13                  | rocker/rstudio:4.6.1 準拠  |
+| Quarto           | 1.10.18               | rocker/rstudio:4.6.1 準拠  |
+| Typst            | 0.15.1                | Quarto 同梱                |
 | Python3          | 3.12.3                | ubuntu 24.04               |
-| uv               | 0.13.5                |                            |
+| uv               | 0.13.6                |                            |
 | Microsoft Edit   | 2.0.0                 |                            |
 
 ## 1. 共通部分（r_base）
@@ -76,9 +74,9 @@ docker compose up -d codeserver          # codeserver_r
 
 ### Pandoc / Quarto
 
-`rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.6.0` と同じバージョンをインストール
+`rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.6.1` と同じバージョンをインストール
 
-### arf: Alternative R Frontend
+### [arf: Alternative R Frontend](https://github.com/eitsupi/arf)
 
 - "no longer under active development" となった [radian](https://github.com/randy3k/radian) から [arf](https://github.com/eitsupi/arf) に変更
 - Python製の radian と異なり arf は Rust製のため、イメージへの Python のインストールは縮小する
@@ -88,17 +86,24 @@ docker compose up -d codeserver          # codeserver_r
 - パッケージ等のインストール高速化のため、[uv](https://docs.astral.sh/uv/) を導入しておく
 - システム（ubuntu）の `python3` を最小限でインストールしておき、そちらの使用を優先する
 - 必要に応じて、PEP 723 (Inline script metadata) あるいは `uv init` などで対応
+- dependency cooldown : 一般ユーザー ruser の場合、uv 経由でのパッケージ導入はリリース後1週間以上経過したパッケージのみに制限
 
 ### [Microsoft Edit](https://github.com/microsoft/edit)
 
 `docker exec -it ...` で設定を変更する際などのCLI用のテキストエディタがないので、`msedit` の名前で使用できるように導入しておく
+
+### TinyTeX
+
+- Quarto-Typst で日本語PDFも作成できほぼ使わななくなったため、TinyTeX はパッケージはインストールしてあるがセットアップをしていない状態
+- 必要に応じてユーザー権限でセットアップスクリプト `/my_script/install_tinytex.sh` を実行する（RStudio の Terminal で可）
+    - R4.3系以降メンテナンスしていないが、TeX Live 2022 frozen ベースで LuaLaTeX / XeLaTeX で日本語PDFを作成できる環境が準備できるはず
 
 
 ## 2. RStudio Server イメージ（rstudio）
 
 ### RStudio Server
 
-- `rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.6.0` と同じバージョンをインストール
+- `rocker/r-ver` 内に収録されている rocker project 製のインストールスクリプトを使用して、`rocker/rstudio:4.6.1` と同じバージョンをインストール
 - 起動時のディレクトリは /workspace
 - 個人設定は `/home/ruser/.config/rstudio/rstudio-prefs.json`
 - TCP 8787 ポートで待機
@@ -108,7 +113,7 @@ docker run --rm -d \
   -p 8787:8787 \
   -v ./rstudio-prefs.json:/home/ruser/.config/rstudio/rstudio-prefs.json \
   --name rstudio \
-  mokztk/rstudio:4.6.0
+  mokztk/rstudio:4.6.1
   
 # http://localhost:8787/
 ```
@@ -141,7 +146,7 @@ podman run --rm -d \
   --user root \
   -e RUNROOTLESS=false \
   -p 8787:8787 \
-  mokztk/rstudio:4.6.0
+  mokztk/rstudio:4.6.1
 ```
 
 で起動できる。それ以上は、[公式](https://rocker-project.org/use/rootless-podman.html) 参照のこと。
@@ -149,12 +154,6 @@ podman run --rm -d \
 また、`ROOTLESS=false` を設定しておけば、従来どおり一般ユーザーを使用するので amd64 (x86_64) 版と設定ファイルなどを共用できる。
 
 以上より、`ROOTLESS=false` を埋め込んでおく。rocker project 純正の rootless 用処理が必要なら、`-e ROOTLESS=true` で起動する。
-
-### TinyTeX
-
-- Quarto-Typst で日本語PDFも作成できほぼ使わななくなったため、TinyTeX はパッケージはインストールしてあるがセットアップをしていない状態
-- 必要に応じてユーザー権限でセットアップスクリプト `/my_script/install_tinytex.sh` を実行する（RStudio の Terminal で可）
-    - R4.3系以降メンテナンスしていないが、TeX Live 2022 frozen ベースで LuaLaTeX / XeLaTeX で日本語PDFを作成できる環境が準備できるはず
 
 
 ## 3. SSH server イメージ（r_remote）
@@ -166,7 +165,7 @@ docker run --rm -d \
   -p 2222:22 \
   -v ./id_ed25519.pub:/home/ruser/.ssh/authorized_keys:ro \
   --name r_remote \
-  mokztk/r_remote:4.6.0
+  mokztk/r_remote:4.6.1
 
 # ssh -p 2222 ruser@localhost
 ```
@@ -177,16 +176,49 @@ docker run --rm -d \
 ## 4. code-server イメージ（codeserver_r）
 
 - [公式](https://github.com/coder/code-server) のインストールスクリプトを使用してインストール
-- code-server は TCP 8080、httpgd は TCP 8088 番ポートを使用
-- 設定ファイル用に、`/home/ruser/.local/share/code-server/User/settings.json` に所有者 ruser の空ファイルを作成済
+- code-server は TCP 8080、httpgd はトークン無しで TCP 8088 番ポートを使用
 - 起動時のディレクトリは /workspace に設定
+- RStudio と同様のキーボードショートカット
+    - `Shift + Ctrl + m` で `|>` を挿入（R, Rmd, Quarto）
+    - `Shift + Ctrl + c` で行コメントの切り替え（デフォルトは `Ctrl + /`）
+    - `F1` でヘルプのパネルを開く
 
-#### settings.json 見本ファイル
+### 拡張機能
+
+| 拡張機能          | Open VSX Registry ID            | バージョン |
+|-------------------|------------------------------------|---------|
+| REditorSupport    | REditorSupport.r                   | 3.2.0   | 
+| R Debugger        | RDebugger.r-debugger               | 0.5.6   | 
+| Quarto            | quarto.quarto                      | 1.139.0 | 
+| Better Align      | chouzz.vscode-better-align         | 2.8.0   | 
+| Error Lens        | usernamehw.errorlens               | 3.24.1  | 
+| Path Intellisense | christian-kohler.path-intellisense | 4.2.3   | 
+| Rainbow CSV       | mechatroner.rainbow-csv            | 3.30.0  | 
+| Excel Viewer      | grapecity.gc-excelviewer           | 1.4.5   | 
+
+- 関連 R パッケージ
+    - languageserver@0.3.20
+    - httpgd@2.1.4
+    - styler@1.11.0
+    - ManuelHentschel/vscDebugger@v0.5.9
+
+### 個人用設定
+
+`/home/ruser/.local/share/code-server/User/settings.json` に以下を設定
 
 - R 用コンソールは `arf` (r.consolePath)
 - R のグラフィックデバイスは `httpgd::hgd()` (r.plot.backend)
     - コンテナのホスト名をを `127.0.0.1` へ転送される `localtest.me` にしておくことで、R Plot パネルの "Open in External Browser" で httpgd のタブを開くことが出来る
 - タブ設定はスペース 2文字分 (editor.tabSize)
+- Ctrl + Enter でエディター画面からコンソール (arf) にブロック単位でコードを送れるようにする（r.bracketedPaste）
+- 拡張機能は自動更新しない（extensions.autoUpdate / extensions.autoCheckUpdates）
+
+#### settings.json 見本ファイル
+
+コンテナ起動時に、-v オプションで `/home/ruser/.local/share/code-server/User/settings.json` を上書きマウントする
+
+上記の埋め込み settings.json の内容に加えて
+
 - REditorSupport, Quarto 拡張機能による保存時の自動整形を有効化 (editor.formatOnSave)
 - ファイルの自動保存は off (files.autoSave)
 - 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
@@ -198,31 +230,11 @@ docker run --rm -d \
   --hostname localtest.me \
   -v ./settings.json:/home/ruser/.local/share/code-server/User/settings.json \
   --name codeserver_r \
-  mokztk/codeserver_r:4.6.0
+  mokztk/codeserver_r:4.6.1
 
-# http://localhost:8080/      # code-server
+# http://localhost:8080/         # code-server
 # http://localtest.me:8088/live  # httpgd
 ```
-
-- 拡張機能 
-    - REditorSupport (REditorSupport.r)
-    - R Debugger (RDebugger.r-debugger)
-    - Quarto (quarto.quarto)
-    - Better Align (chouzz.vscode-better-align)
-    - Error Lens (usernamehw.errorlens)
-    - Path Intellisense (christian-kohler.path-intellisense)
-    - Rainbow CSV (mechatroner.rainbow-csv)
-    - Excel Viewer (grapecity.gc-excelviewer)
-- Language Server
-    - R `{languageserver}`
-- RStudio と同様のキーボードショートカット
-    - `Shift + Ctrl + m` で `|>` を挿入（R, Rmd, Quarto）
-    - `Shift + Ctrl + c` で行コメントの切り替え（デフォルトは `Ctrl + /`）
-    - `F1` でヘルプのパネルを開く
-
-### dependency cooldown
-
-一般ユーザー ruser の場合、uv 経由でのパッケージ導入はリリース後1週間以上経過したパッケージのみに制限
 
 
 ## 5. History
@@ -251,3 +263,4 @@ docker run --rm -d \
 - **2026-03-13** 🔖[4.5.2_2026Mar](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.2_2026Mar) : `rocker/r-ver:4.5.2` ベースに更新
 - **2026-05-08** 🔖[4.5.3_2026May](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.3_2026May) : `rocker/r-ver:4.5.3` ベースに更新。code-server 版と一本化。
 - 2026-10-23 : Node、Python関連の整理、code-server 拡張機能の再編（4.6.x 系の準備）
+- **2026-10-30** 🔖[4.6.1_2026Oct](https://github.com/mokztk/RStudio_docker/releases/tag/4.6.1_2026Oct) : `rocker/r-ver:4.6.1` ベースに更新
