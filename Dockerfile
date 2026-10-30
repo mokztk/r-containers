@@ -55,6 +55,11 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 ENV UV_PYTHON_PREFERENCE=system
 COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /uvx /usr/local/bin/
 
+# dependency cooldown
+RUN mkdir -p /home/${DEFAULT_USER}/.config/uv \
+    && echo 'exclude-newer = "1 week"' >> /home/${DEFAULT_USER}/.config/uv/uv.toml \
+    && chown ${DEFAULT_USER}:${DEFAULT_USER} /home/${DEFAULT_USER}/.config/uv/uv.toml
+
 # arf: Alternative R Frontend
 RUN curl -fsSL https://github.com/eitsupi/arf/releases/download/v0.6.0/arf-console-`uname -m`-unknown-linux-gnu.tar.xz \
     | tar -Jx --strip-components 1 -C /usr/local/bin/
