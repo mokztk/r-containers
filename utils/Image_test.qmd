@@ -25,7 +25,7 @@ format:
 pacman::p_load(tidyverse)
 pacman::p_install("hexbin", force = FALSE)
 
-diamonds |> 
+diamonds |>
   ggplot(aes(x = carat, y = price, fill = clarity)) +
   geom_hex(linewidth = .5, colour = "white") +
   ggsci::scale_fill_observable() +
@@ -41,50 +41,61 @@ diamonds |>
 ## Pandoc and Quarto
 
 ```{r}
-system("which pandoc; pandoc --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+system("which pandoc; pandoc --version", intern = TRUE) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ```{r}
-system("which quarto; quarto --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+system("which quarto; quarto --version", intern = TRUE) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ```{r}
-system("quarto pandoc --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+system("quarto pandoc --version", intern = TRUE) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ```{r}
-system("quarto typst --version 2>&1", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+system("quarto typst --version 2>&1", intern = TRUE) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ## Node.js and npm, pnpm
 
 ```{r}
-system("pnpm --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
-  cat()
+tryCatch(
+  {
+    system("pnpm --version", intern = TRUE) |>
+      paste(collapse = "\n") |>
+      cat()
+    
+    system("pnpm config list", intern = TRUE) |>
+      paste(collapse = "\n") |>
+      cat()
+  },
+  error = function(e) cat("PNPM が見つかりません")
+)
+```
 
-system("pnpm config list", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+```{r}
+tryCatch(
+  system("npm --version", intern = TRUE),
+  error = function(e) cat("NPM が見つかりません")
+) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ```{r}
-system("npm --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
-  cat()
-```
-
-```{r}
-system("node --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+tryCatch(
+  system("node --version", intern = TRUE),
+  error = function(e) cat("Node.js が見つかりません")
+) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
@@ -93,25 +104,28 @@ system("node --version", intern = TRUE) |>
 ```{r}
 # 環境により、~/.local/bin にPATHが通っていないことがある
 tryCatch(
-    system("msedit --version", intern = TRUE),
-    error = function(e) {
-      paste0(Sys.getenv("HOME"), "/.local/bin にPATHが通っていません\n") |> cat()
-      system("~/.local/bin/msedit --version", intern = TRUE)
-    }
-  ) |>
-  paste(collapse = "\n") |> 
+  system("msedit --version", intern = TRUE),
+  error = function(e) {
+    paste0(Sys.getenv("HOME"), "/.local/bin にPATHが通っていません\n") |> cat()
+    system("~/.local/bin/msedit --version", intern = TRUE)
+  }
+) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ```{r}
-system("which python; python --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+tryCatch(
+  system("which python; python --version", intern = TRUE),
+  error = function(e) system("which python3; python3 --version", intern = TRUE)
+) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 
 ```{r}
-system("which uv; uv --version", intern = TRUE) |> 
-  paste(collapse = "\n") |> 
+system("which uv; uv --version", intern = TRUE) |>
+  paste(collapse = "\n") |>
   cat()
 ```
 

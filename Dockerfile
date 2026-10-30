@@ -5,7 +5,7 @@
 ARG BUILDKIT_INLINE_CACHE=1
 ARG TARGETPLATFORM
 
-FROM --platform=$TARGETPLATFORM rocker/r-ver:4.6.0 AS base_stacks
+FROM --platform=$TARGETPLATFORM rocker/r-ver:4.6.1 AS base_stacks
 
 LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
@@ -13,8 +13,8 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 各種ツールのバージョン指定
-ENV PANDOC_VERSION="3.10"
-ENV QUARTO_VERSION="1.9.37"
+ENV PANDOC_VERSION="3.13"
+ENV QUARTO_VERSION="1.10.18"
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # 以降も何度か apt-get を使うので BuildKit のキャッシュマウント機能を使う
@@ -45,7 +45,7 @@ RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}" \
     && chmod 0440 "/etc/sudoers.d/${DEFAULT_USER}"
 
 # pandoc & quarto
-# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @2b91d04 準拠）
+# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @211aa05 準拠）
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     sed -e "16,26d" -e "85d" /rocker_scripts/install_pandoc.sh | bash \
     && sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
@@ -53,7 +53,12 @@ RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
 # uv (Python manager) 
 # Python はシステムの python 3.12.3 を優先使用
 ENV UV_PYTHON_PREFERENCE=system
-COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /uvx /usr/local/bin/
+
+# dependency cooldown
+RUN mkdir -p /home/${DEFAULT_USER}/.config/uv \
+    && echo 'exclude-newer = "1 week"' >> /home/${DEFAULT_USER}/.config/uv/uv.toml \
+    && chown ${DEFAULT_USER}:${DEFAULT_USER} /home/${DEFAULT_USER}/.config/uv/uv.toml
 
 # arf: Alternative R Frontend
 RUN curl -fsSL https://github.com/eitsupi/arf/releases/download/v0.6.0/arf-console-`uname -m`-unknown-linux-gnu.tar.xz \
@@ -112,9 +117,9 @@ FROM base_stacks AS rstudio
 
 LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
-# rocker/rstudio:4.6.0 に合わせる
+# rocker/rstudio:4.6.1 に合わせる
 ENV S6_VERSION="v2.1.0.2"
-ENV RSTUDIO_VERSION="2026.05.1+225"
+ENV RSTUDIO_VERSION="2026.10.1+239"
 
 RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
     apt-get update \
@@ -157,7 +162,7 @@ FROM base_stacks AS codeserver
 
 LABEL org.opencontainers.image.source = "https://github.com/mokztk/r-containers"
 
-ENV CODESERVER_VERSION="4.141.0"
+ENV CODESERVER_VERSION="4.144.0"
 
 # code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version ${CODESERVER_VERSION}

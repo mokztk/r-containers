@@ -28,7 +28,8 @@ function pak_pak() {
 pak_pak \
     languageserver \
     httpgd \
-    styler
+    styler \
+    ManuelHentschel/vscDebugger@v0.5.9
 
 # rocker/tidyverse 相当のパッケージ
 # 容量の大きな database backend は RSQLite 以外省略（行番号は @2b91d04 準拠）
@@ -55,11 +56,13 @@ pak_pak \
     quarto \
     tidylog \
     furrr \
+    skimr \
     glmnetUtils \
     glmmTMB \
     ggeffects \
     pROC \
     cmprsk \
+    tidycmprsk \
     car \
     mice \
     ggmice \

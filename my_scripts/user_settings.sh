@@ -1,25 +1,44 @@
 #!/bin/bash
 
-# 各アプリのユーザー設定
+# code-server 用のユーザー設定
 
-#-------------------------------
-#  code-server
-#-------------------------------
+# VS Code 拡張機能
+# 動作を確認したバージョンに固定し、拡張機能の自動更新は止めておく
+code-server --install-extension REditorSupport.r@3.2.0
+code-server --install-extension RDebugger.r-debugger@0.5.6
+code-server --install-extension quarto.quarto@1.139.0
+code-server --install-extension christian-kohler.path-intellisense@2.8.0
+code-server --install-extension mechatroner.rainbow-csv@3.24.1
+code-server --install-extension cweijan.vscode-office@4.2.3
+code-server --install-extension usernamehw.errorlens@3.30.0
+code-server --install-extension chouzz.vscode-better-align@1.4.5
 
-# VS Code plugins
-code-server --install-extension REditorSupport.r
-code-server --install-extension RDebugger.r-debugger
-code-server --install-extension quarto.quarto
-code-server --install-extension christian-kohler.path-intellisense
-code-server --install-extension mechatroner.rainbow-csv
-code-server --install-extension grapecity.gc-excelviewer
-code-server --install-extension usernamehw.errorlens
-code-server --install-extension chouzz.vscode-better-align
+# REditorSupport.r に同梱されている {sess} をインストール
+SESS_DIR=$(find /home/ruser -path "*/reditorsupport.r*/*/sess" 2>/dev/null | head -n 1)
+if [ -n "$SESS_DIR" ]; then
+    R CMD INSTALL "$SESS_DIR";
+fi
 
-# 設定ファイルを docker run -v でマウントするための空ファイル
-# 所有者を ${DEFAULT_USER} にして準備しておかないと root になってしまい変更が書き込めない
-mkdir -p ~/.config/code-server
-touch ~/.local/share/code-server/User/settings.json
+# arfとhttpgdを有効にするための最小限の設定
+# docker run -v で上書きマウントする前提
+
+mkdir -p ~/.config/code-server/
+# touch ~/.local/share/code-server/User/settings.json
+
+cat << 'EOF' > ~/.local/share/code-server/User/settings.json
+{
+    "editor.tabSize": 2,
+    "remote.autoForwardPortsSource": "hybrid",
+    "extensions.autoUpdate": false,
+    "extensions.autoCheckUpdates": false,
+    "r.consolePath": "/usr/local/bin/arf",
+    "r.interactive.arfPath": "/usr/local/bin/arf",
+    "terminal.integrated.defaultProfile.linux": "R Terminal",
+    "r.plot.backend": "httpgd",
+    "r.lsp.enabled": true,
+    "r.bracketedPaste": true
+}
+EOF
 
 # Rのグラフィックデバイスとして httpgd::hgd() を使う設定とコード整形
 # settings.json で "r.plot.backend": "httpgd" が必要
@@ -96,12 +115,3 @@ cat << EOF > ~/.local/share/code-server/User/keybindings.json
     }
 ]
 EOF
-
-#-------------------------------
-#  uv
-#-------------------------------
-
-# 安全のため、リリース後1週間以上経ったパッケージのみインストールできるようにする
-
-mkdir -p ~/.config/uv
-echo 'exclude-newer = "1 week"' >> ~/.config/uv/uv.toml

@@ -6,6 +6,8 @@
     "remote.autoForwardPortsSource": "hybrid",
     "editor.tabSize": 2,
     "files.autoSave": "off",
+    "extensions.autoUpdate": false,
+    "extensions.autoCheckUpdates": false,
     // R用設定
     "r.consolePath": "/usr/local/bin/arf",
     "r.interactive.arfPath": "/usr/local/bin/arf",
