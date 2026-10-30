@@ -200,6 +200,7 @@ docker run --rm -d \
     - languageserver@0.3.20
     - httpgd@2.1.4
     - styler@1.11.0
+    - sess@3.2.0
     - ManuelHentschel/vscDebugger@v0.5.9
 
 ### 個人用設定
@@ -222,6 +223,11 @@ docker run --rm -d \
 - REditorSupport, Quarto 拡張機能による保存時の自動整形を有効化 (editor.formatOnSave)
 - ファイルの自動保存は off (files.autoSave)
 - 起動時にR Terminalを開く（terminal.integrated.defaultProfile.linux）
+- R, Rmd, Quarto のコードフォーマッタに関する設定（editor.defaultFormatter / editor.formatOnSave ）
+- 拡張機能なしでのブラケットの色分け（editor.bracketPairColorization.enabled / editor.guides.bracketPairs）
+- Path Intellisense 拡張: 相対パスの基点をワークスペースに設定（path-intellisense.absolutePathToWorkspace）
+- Error Lens 拡張: Rの文法エラーを主張しすぎない程度に見やすく調整（errorLens.enabledDiagnosticLevels）
+
 
 ```bash
 docker run --rm -d \
